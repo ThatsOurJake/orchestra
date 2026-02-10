@@ -1,0 +1,31 @@
+h2. Summary
+{ 1-2 lines of context & overview. }
+
+*What:* 
+{ What are we trying to achieve in this ticket }
+
+*Why:*
+{ Why are we doing this ticket item }
+
+h2. Dependencies
+{ Dependencies do not need filling in, simply output the headers to be filled in later  }
+
+*Blockers for release:*
+(-)
+*Blockers for development:*
+(-)
+
+h2. Acceptance Criteria:
+{ Checklist of actionable, concise, singular scenarios that must be fulfilled, provide a list with each item being on a new line using (x) as the prefix }
+
+h2. Tech Notes:
+{ Optional Notes - Resources, Examples, Additional details / reminders, Implementation details }
+
+(*) Documentation links: 
+{ Documentation links do not need filling in, simply output the headers to be filled in later  }
+
+(*) Code entry point file: 
+{ Code entry points do not need filling in, simply output the headers to be filled in later  }
+
+h2. Testing Considerations:
+{ Outside of unit tests, what testing makes sense for the ticket, provide a list with each item being on a new line using (!) as the prefix }
