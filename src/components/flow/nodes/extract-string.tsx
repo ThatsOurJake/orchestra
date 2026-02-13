@@ -39,7 +39,6 @@ export const ExtractStringNode = ({
     () => determineContextKeysFromNode(id, nodes, edges),
     [edges, id, nodes],
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const strProps = useMemo(
     () => contextProps.filter(([_key, type]) => type === 'string'),
     [contextProps],

@@ -1,5 +1,5 @@
 import type { HandleProps } from '@xyflow/react';
-import React, { type ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import { BaseHandle } from '@/components/shadcn/base-handle';
 import { cn } from '@/lib/utils';
 

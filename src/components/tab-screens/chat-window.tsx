@@ -221,7 +221,6 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
 
     startMachine();
     // machineId is needed to trigger re-run when machine is created
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getMachine, chatState, setChatState, setFlowError]);
 
   const startFlow = useCallback(

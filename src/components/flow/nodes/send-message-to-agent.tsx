@@ -14,7 +14,7 @@ import {
   BaseNodeHeader,
   BaseNodeHeaderTitle,
 } from '../../shadcn/base-node';
-import { type Agent, useStore } from '../../store';
+import type { Agent } from '../../store';
 import { ConnectionHandle } from '../connection-handle';
 import { type AppState, useFlowStore } from '../flow-store';
 import { useTextInsert } from '../hooks/use-text-insert';
