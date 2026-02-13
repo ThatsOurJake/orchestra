@@ -10,7 +10,8 @@
     ],
     "module": "ESNext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "dom-chromium-ai"
     ],
     "skipLibCheck": true,
     /* Bundler mode */

@@ -1,15 +1,15 @@
 import { useCallback } from 'react';
-import { useNavigation } from '../components/router/context';
+import { useNavigate } from 'react-router';
 
 export const Overview = () => {
-  const navigate = useNavigation();
+  const navigate = useNavigate();
 
   const onNewTicket = useCallback(() => {
     navigate('/create');
   }, [navigate]);
 
   return (
-    <div className="flex justify-center items-center h-full w-full flex-col">
+    <div className="flex justify-center items-center grow shrink flex-col">
       <p className="text-4xl">Welcome</p>
       <p className="text-xl mt-6">Description description description</p>
       <button

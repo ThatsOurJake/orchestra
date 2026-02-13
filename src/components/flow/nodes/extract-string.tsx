@@ -2,6 +2,7 @@ import { type Node, type NodeProps, Position } from '@xyflow/react';
 import { type ChangeEvent, useCallback, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { determineContextKeysFromNode } from '../../../utils/flow-helpers';
+import { BaseHandle } from '../../shadcn/base-handle';
 import {
   BaseNode,
   BaseNodeContent,
@@ -82,11 +83,10 @@ export const ExtractStringNode = ({
         </BaseNodeHeaderTitle>
       </BaseNodeHeader>
       <BaseNodeContent>
-        <ConnectionHandle
+        <BaseHandle
           id="extract-string-target"
           type="target"
           position={Position.Top}
-          connectionLimit={1}
         />
         <select
           className="border border-amber-200 p-0.5 rounded"
@@ -110,6 +110,9 @@ export const ExtractStringNode = ({
           value={regex}
           onChange={onRegexChange}
         />
+        <p className="text-xs text-gray-400 text-center">
+          Regex will execute with "i" flags
+        </p>
         <ConnectionHandle
           id="extract-string-source"
           type="source"

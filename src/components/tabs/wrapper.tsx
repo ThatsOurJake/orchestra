@@ -18,7 +18,7 @@ export const TabsWrapper = ({ children }: TabsWrapperProps) => {
         },
       }}
     >
-      {children}
+      <div className="flex flex-col shrink grow">{children}</div>
     </TabContext.Provider>
   );
 };

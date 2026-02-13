@@ -1,24 +1,17 @@
 import { type Node, type NodeProps, Position } from '@xyflow/react';
-import {
-  type ChangeEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type ChangeEvent, useCallback, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { determineContextKeysFromNode } from '../../../utils/flow-helpers';
+import { BaseHandle } from '../../shadcn/base-handle';
 import {
   BaseNode,
   BaseNodeContent,
   BaseNodeHeader,
   BaseNodeHeaderTitle,
 } from '../../shadcn/base-node';
-import { ConnectionHandle } from '../connection-handle';
 import { ConnectionLabelHandle } from '../connection-label-handle';
 import { type AppState, useFlowStore } from '../flow-store';
+import { useTextInsert } from '../hooks/use-text-insert';
 
 export type ConditionalNodeProps = Node<
   {
@@ -41,10 +34,22 @@ export const ConditionalNode = ({
     useShallow(selector),
   );
   const inputRef = useRef<HTMLInputElement>(null);
-  const [cursorPosition, setCursorPosition] = useState(0);
   const contextProps = useMemo(
     () => determineContextKeysFromNode(id, nodes, edges),
     [edges, id, nodes],
+  );
+
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      updateConditionalNode(id, newValue);
+    },
+    [id, updateConditionalNode],
+  );
+
+  const { onCursorPositionChange, insertTextAtCursor } = useTextInsert(
+    inputRef,
+    statement,
+    handleValueChange,
   );
 
   const onValueChange = useCallback(
@@ -52,7 +57,6 @@ export const ConditionalNode = ({
       const {
         target: { value, selectionStart, selectionEnd },
       } = e;
-      setCursorPosition(selectionStart || 0);
       updateConditionalNode(id, value);
 
       // Restore cursor position after React re-renders
@@ -65,37 +69,11 @@ export const ConditionalNode = ({
     [id, updateConditionalNode],
   );
 
-  const onCursorPositionChange = useCallback(
-    (e: MouseEvent<HTMLInputElement> | KeyboardEvent<HTMLInputElement>) => {
-      setCursorPosition(e.currentTarget.selectionStart || 0);
-    },
-    [],
-  );
-
   const insertContextValue = useCallback(
     (contextKey: string) => {
-      if (!inputRef.current) return;
-
-      const textToInsert = `%${contextKey}%`;
-      const currentValue = statement;
-      const newValue =
-        currentValue.slice(0, cursorPosition) +
-        textToInsert +
-        currentValue.slice(cursorPosition);
-      const newCursorPos = cursorPosition + textToInsert.length;
-
-      updateConditionalNode(id, newValue);
-
-      // Set cursor position after the inserted text
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-          setCursorPosition(newCursorPos);
-        }
-      });
+      insertTextAtCursor(`%${contextKey}%`);
     },
-    [id, statement, cursorPosition, updateConditionalNode],
+    [insertTextAtCursor],
   );
 
   return (
@@ -132,11 +110,10 @@ export const ConditionalNode = ({
             ))}
           </div>
         </div>
-        <ConnectionHandle
+        <BaseHandle
           id="conditional-target"
           type="target"
           position={Position.Top}
-          connectionLimit={1}
         />
       </BaseNodeContent>
       <div className="flex justify-between border-t py-2">

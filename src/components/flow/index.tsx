@@ -2,7 +2,7 @@ import type { DefaultEdgeOptions } from '@xyflow/react';
 import { Background, Controls, ReactFlow, useReactFlow } from '@xyflow/react';
 import { useCallback, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { getNodeId } from '../../utils/flow-helpers';
+import { nodeIdHelper } from '../../utils/flow-helpers';
 import { useCurrentTab } from '../tabs/context';
 
 import { type AppNodes, type AppState, useFlowStore } from './flow-store';
@@ -10,8 +10,10 @@ import { ConditionalNode } from './nodes/conditional';
 import { CreateAgentNode } from './nodes/create-agent';
 import { EndNode } from './nodes/end';
 import { ExtractStringNode } from './nodes/extract-string';
+import { OutputNode } from './nodes/output';
 import { ParametersNode } from './nodes/parameters';
 import { SendMessageToAgentNode } from './nodes/send-message-to-agent';
+import { VariableNode } from './nodes/variable';
 import { Sidebar } from './sidebar';
 
 import '@xyflow/react/dist/style.css';
@@ -23,6 +25,8 @@ const nodeTypes = {
   conditional: ConditionalNode,
   extractString: ExtractStringNode,
   endNode: EndNode,
+  variable: VariableNode,
+  outputNode: OutputNode,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -76,16 +80,20 @@ export const Flow = () => {
     const offset = 50 / zoom;
 
     const newNodes: AppNodes[] = copiedNodesRef.current.map((node) => {
-      const newId = getNodeId(node.type);
+      const newId = nodeIdHelper.getNodeId(node.type);
 
       return {
-        ...node,
         id: newId,
+        type: node.type,
         position: {
           x: node.position.x + offset,
           y: node.position.y + offset,
         },
+        data: node.data,
         selected: true,
+        ...(node.width && { width: node.width }),
+        ...(node.height && { height: node.height }),
+        ...(node.style && { style: node.style }),
       } as AppNodes;
     });
 
@@ -100,6 +108,12 @@ export const Flow = () => {
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      // Don't intercept copy/paste if user is typing in an input or textarea
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
       const isModifierKey = event.ctrlKey || event.metaKey;
 
       if (isModifierKey && event.key === 'c') {
@@ -146,7 +160,7 @@ export const Flow = () => {
           <Controls />
         </ReactFlow>
       </div>
-      <div className="w-32 md:w-40">
+      <div className="w-32 md:w-52 shadow">
         <Sidebar />
       </div>
     </div>

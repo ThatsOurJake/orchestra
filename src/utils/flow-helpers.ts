@@ -3,12 +3,28 @@ import type { AppNodes } from '../components/flow/flow-store';
 import type { ConditionalNodeProps } from '../components/flow/nodes/conditional';
 import type { CreateAgentNodeProps } from '../components/flow/nodes/create-agent';
 import type { ExtractStringNodeProps } from '../components/flow/nodes/extract-string';
+import type { OutputNodeProps } from '../components/flow/nodes/output';
 import type { ParametersNodeProps } from '../components/flow/nodes/parameters';
 import type { SendMessageToAgentProps } from '../components/flow/nodes/send-message-to-agent';
+import type { VariableNodeProps } from '../components/flow/nodes/variable';
 
-let dndId = 0;
-export const getNodeId = (nodeType: AppNodes['type']) =>
-  `${nodeType}_${dndId++}`;
+const nodeIdHelperBuilder = () => {
+  let currentId = 0;
+
+  const getNodeId = (nodeType: AppNodes['type']) =>
+    `${nodeType}_${currentId++}`;
+
+  const resetId = () => {
+    currentId = 0;
+  };
+
+  return {
+    getNodeId,
+    resetId,
+  };
+};
+
+export const nodeIdHelper = nodeIdHelperBuilder();
 
 export const isParametersNode = (node: AppNodes): node is ParametersNodeProps =>
   node.type === 'parameters';
@@ -29,6 +45,15 @@ export const isExtractStringNode = (
   node: AppNodes,
 ): node is ExtractStringNodeProps => node.type === 'extractString';
 
+export const isVariableNode = (node: AppNodes): node is VariableNodeProps =>
+  node.type === 'variable';
+
+export const isOutputNode = (node: AppNodes): node is OutputNodeProps =>
+  node.type === 'outputNode';
+
+export const isEndNode = (node: AppNodes): node is OutputNodeProps =>
+  node.type === 'endNode';
+
 export const walkBackFindingNodeType = (
   nodeType: AppNodes['type'][],
   startId: string,
@@ -38,10 +63,9 @@ export const walkBackFindingNodeType = (
   const found: AppNodes[] = [];
   const traversed: AppNodes[] = [];
   const visited = new Set<string>();
-  let stopped = false;
 
   const dfs = (id: string) => {
-    if (stopped || visited.has(id)) {
+    if (visited.has(id)) {
       return;
     }
 
@@ -55,16 +79,7 @@ export const walkBackFindingNodeType = (
         found.push(node);
       }
 
-      if (node.type === 'parameters') {
-        stopped = true;
-        return;
-      }
-
       dfs(node.id);
-
-      if (stopped) {
-        return;
-      }
     }
   };
 
@@ -79,7 +94,7 @@ export const determineContextKeysFromNode = (
   edgesList: Edge[] = [],
 ) => {
   const { found: dataSettingNodes } = walkBackFindingNodeType(
-    ['parameters', 'sendMessageToAgent', 'extractString'],
+    ['parameters', 'sendMessageToAgent', 'extractString', 'variable'],
     startId,
     nodesList,
     edgesList,
@@ -98,13 +113,24 @@ export const determineContextKeysFromNode = (
         acc.push([`${current.id}_output`, 'string']);
       }
 
+      if (isVariableNode(current)) {
+        const {
+          data: { name, type },
+        } = current;
+        acc.push([name, type]);
+      }
+
       return acc;
     },
     [],
   );
 
   // TODO: Something better due to types
-  contextProps.push(['prev_node', 'string']);
+  contextProps.push(['prev_output', 'string']);
 
-  return contextProps;
+  const uniqueContextProps = contextProps.filter(
+    (item, index, self) => index === self.findIndex((t) => t[0] === item[0]),
+  );
+
+  return uniqueContextProps;
 };

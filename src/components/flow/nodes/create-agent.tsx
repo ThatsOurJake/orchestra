@@ -6,19 +6,22 @@ import {
   BaseNodeHeader,
   BaseNodeHeaderTitle,
 } from '../../shadcn/base-node';
-import { useAgents } from '../../store';
+import { type Agent, useAgents } from '../../store';
 import { ConnectionHandle } from '../connection-handle';
 import { useFlowStore } from '../flow-store';
 
 export type CreateAgentNodeProps = Node<
   {
-    selectedAgent?: string;
+    selectedAgent?: {
+      agent: Agent;
+      agentFlowId: string;
+    };
   },
   'createAgent'
 >;
 
 export const CreateAgentNode = ({
-  data: { selectedAgent = 'default' },
+  data: { selectedAgent },
   id,
 }: NodeProps<CreateAgentNodeProps>) => {
   const agents = useAgents();
@@ -31,9 +34,14 @@ export const CreateAgentNode = ({
       const {
         target: { value },
       } = e;
-      updateCreateAgentNode(id, value);
+      const agent = agents.find((x) => x.id === value)!;
+
+      updateCreateAgentNode(id, {
+        agent,
+        agentFlowId: crypto.randomUUID(),
+      });
     },
-    [updateCreateAgentNode, id],
+    [updateCreateAgentNode, id, agents],
   );
 
   return (
@@ -52,14 +60,14 @@ export const CreateAgentNode = ({
         />
         <select
           className="border border-amber-200 p-0.5 rounded"
-          value={selectedAgent}
+          value={selectedAgent?.agent.id || 'default'}
           onChange={onChange}
         >
           <option disabled value="default">
             Select an agent
           </option>
           {agents.map((a) => (
-            <option key={a.id} value={a.name}>
+            <option key={a.id} value={a.id}>
               {a.name}
             </option>
           ))}

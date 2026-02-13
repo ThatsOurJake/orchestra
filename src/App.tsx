@@ -1,7 +1,7 @@
+import { BrowserRouter, Route, Routes } from 'react-router';
 import { ToastContainer } from 'react-toastify';
+import { InputModal } from './components/input-modal';
 import { NavBar } from './components/nav-bar';
-import { Router } from './components/router';
-import { Route } from './components/router/route';
 import { Agents } from './routes/agents';
 import { Create } from './routes/create';
 import { Flows } from './routes/flows';
@@ -10,16 +10,24 @@ import { Overview } from './routes/overview';
 const App = () => {
   return (
     <div className="bg-gray-900 h-screen w-screen text-white flex">
-      <Router>
-        <NavBar />
-        <main className="grow shrink flex flex-col">
-          <Route path="/" component={Overview} />
-          <Route path="/create" component={Create} />
-          <Route path="/agents" component={Agents} />
-          <Route path="/flows" component={Flows} />
+      <BrowserRouter>
+        <main className="w-full h-full flex flex-row">
+          <NavBar />
+          <Routes>
+            <Route path="/" Component={Overview} />
+            <Route path="/create" Component={Create} />
+            <Route path="/agents" Component={Agents} />
+            <Route path="/flows" Component={Flows} />
+          </Routes>
         </main>
-      </Router>
-      <ToastContainer position="top-right" theme="light" />
+      </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        theme="light"
+        pauseOnFocusLoss={false}
+        pauseOnHover={false}
+      />
+      <InputModal />
     </div>
   );
 };

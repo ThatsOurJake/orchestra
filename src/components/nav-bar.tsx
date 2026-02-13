@@ -7,11 +7,11 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { useCallback, useState } from 'react';
-import { useNavigation } from './router/context';
+import { useNavigate } from 'react-router';
 
 export const NavBar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const navigate = useNavigation();
+  const navigate = useNavigate();
 
   const toggleSidebar = useCallback(() => {
     setIsOpen(!isOpen);
@@ -31,7 +31,7 @@ export const NavBar = () => {
 
   return (
     <nav
-      className={`${isOpen ? 'w-60' : 'w-12'} bg-gray-800 h-full p-1 overflow-hidden transition-all drop-shadow-xl`}
+      className={`${isOpen ? 'w-60' : 'w-12'} shrink-0 bg-gray-800 h-full p-1 overflow-hidden transition-all drop-shadow-xl`}
     >
       <div className={`flex flex-col ${isOpen ? 'block' : 'hidden'} h-full `}>
         <div className="flex justify-between items-center w-full p-2">

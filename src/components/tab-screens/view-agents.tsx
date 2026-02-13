@@ -5,7 +5,7 @@ import { useAgents } from '../store';
 export const ViewAgents = () => {
   const agents = useAgents();
   const sorted = useMemo(
-    () => agents.sort((a, b) => a.name.localeCompare(b.name)),
+    () => agents.slice().sort((a, b) => a.name.localeCompare(b.name)),
     [agents],
   );
 

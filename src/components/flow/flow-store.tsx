@@ -12,15 +12,20 @@ import {
   isConditionalNode,
   isCreateAgentNode,
   isExtractStringNode,
+  isOutputNode,
   isParametersNode,
   isSendAgentMessageNode,
+  isVariableNode,
 } from '../../utils/flow-helpers';
+import type { Agent, StoredFlow } from '../store';
 import type { ConditionalNodeProps } from './nodes/conditional';
 import type { CreateAgentNodeProps } from './nodes/create-agent';
 import type { EndNodeProps } from './nodes/end';
 import type { ExtractStringNodeProps } from './nodes/extract-string';
+import type { OutputNodeProps } from './nodes/output';
 import type { Parameter, ParametersNodeProps } from './nodes/parameters';
 import type { SendMessageToAgentProps } from './nodes/send-message-to-agent';
+import type { VariableNodeProps } from './nodes/variable';
 
 export type AppNodes =
   | ParametersNodeProps
@@ -28,7 +33,9 @@ export type AppNodes =
   | SendMessageToAgentProps
   | ConditionalNodeProps
   | ExtractStringNodeProps
-  | EndNodeProps;
+  | EndNodeProps
+  | VariableNodeProps
+  | OutputNodeProps;
 
 export type AppState = {
   nodes: AppNodes[];
@@ -39,20 +46,42 @@ export type AppState = {
   setNodes: (nodes: AppNodes[]) => void;
   setEdges: (edges: Edge[]) => void;
   updateParametersNode: (nodeId: string, parameters: Parameter[]) => void;
-  updateCreateAgentNode: (nodeId: string, selectedAgent: string) => void;
+  updateCreateAgentNode: (
+    nodeId: string,
+    selectedAgent: { agent: Agent; agentFlowId: string },
+  ) => void;
   interactive: boolean;
   setInteractive: (interactive: boolean) => void;
   updateSendAgentMessageNode: (
     nodeId: string,
-    data: { selectedAgent: string; messageContent: string },
+    data: {
+      selectedAgent: { agent: Agent; agentFlowId: string };
+      messageContent: string;
+    },
   ) => void;
   updateConditionalNode: (nodeId: string, statement: string) => void;
   updateExtractStringNode: (
     nodeId: string,
     data: { regex: string; from: string },
   ) => void;
-  exportToJSON: () => string;
-  importFromJSON: (jsonString: string) => void;
+  updateVariableNode: (
+    nodeId: string,
+    data: { name: string; value: string },
+  ) => void;
+  updateOutputNode: (nodeId: string, messageContent: string) => void;
+  projectSettings: {
+    savedSinceEdits: boolean;
+    loadedId?: string;
+    loadedName?: string;
+  };
+  exportFlowData: () => {
+    flow: string;
+    projectSettings: { id?: string; name?: string };
+  };
+  importFlowData: (flow: StoredFlow) => void;
+  setProjectSavedValue: (savedValue: boolean) => void;
+  setProjectSettings: (id: string, name: string) => void;
+  resetProjectSettings: () => void;
 };
 
 const initialNodes: AppNodes[] = [];
@@ -63,18 +92,42 @@ export const useFlowStore = create<AppState>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
   onNodesChange: (changes) => {
+    const state = get();
+
     set({
       nodes: applyNodeChanges(changes, get().nodes),
+      projectSettings: {
+        ...state.projectSettings,
+        savedSinceEdits: false,
+      },
     });
   },
   onEdgesChange: (changes) => {
+    const state = get();
+
     set({
       edges: applyEdgeChanges(changes, get().edges),
+      projectSettings: {
+        ...state.projectSettings,
+        savedSinceEdits: false,
+      },
     });
   },
   onConnect: (connection) => {
+    const state = get();
+
     set({
-      edges: addEdge(connection, get().edges),
+      edges: addEdge(
+        {
+          ...connection,
+          type: 'step',
+        },
+        get().edges,
+      ),
+      projectSettings: {
+        ...state.projectSettings,
+        savedSinceEdits: false,
+      },
     });
   },
   setNodes: (nodes) => {
@@ -94,7 +147,10 @@ export const useFlowStore = create<AppState>((set, get) => ({
       }),
     });
   },
-  updateCreateAgentNode: (nodeId: string, selectedAgent: string) => {
+  updateCreateAgentNode: (
+    nodeId: string,
+    selectedAgent: { agent: Agent; agentFlowId: string },
+  ) => {
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId && isCreateAgentNode(node)) {
@@ -113,7 +169,10 @@ export const useFlowStore = create<AppState>((set, get) => ({
   },
   updateSendAgentMessageNode: (
     nodeId: string,
-    data: { selectedAgent: string; messageContent: string },
+    data: {
+      selectedAgent: { agent: Agent; agentFlowId: string };
+      messageContent: string;
+    },
   ) => {
     set({
       nodes: get().nodes.map((node) => {
@@ -160,7 +219,43 @@ export const useFlowStore = create<AppState>((set, get) => ({
       }),
     });
   },
-  exportToJSON: () => {
+  updateVariableNode: (
+    nodeId: string,
+    data: { name: string; value: string },
+  ) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId && isVariableNode(node)) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              name: data.name,
+              value: data.value,
+              type: 'string',
+            },
+          };
+        }
+
+        return node;
+      }),
+    });
+  },
+  updateOutputNode: (nodeId: string, messageContent: string) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId && isOutputNode(node)) {
+          return {
+            ...node,
+            data: { ...node.data, messageContent },
+          };
+        }
+
+        return node;
+      }),
+    });
+  },
+  exportFlowData: () => {
     const state = get();
 
     const exportData = {
@@ -168,16 +263,32 @@ export const useFlowStore = create<AppState>((set, get) => ({
       edges: state.edges,
     };
 
-    return JSON.stringify(exportData);
+    // TODO: Fix to allow saving and override saving if same project
+    return {
+      flow: JSON.stringify(exportData),
+      projectSettings: {
+        id: state.projectSettings.loadedId,
+        name: state.projectSettings.loadedName,
+      },
+    };
   },
-  importFromJSON: (jsonString: string) => {
+  importFlowData: (flow: StoredFlow) => {
+    const state = get();
+
     try {
-      const importData = JSON.parse(jsonString);
+      const { flowData, id, name } = flow;
+      const importData = JSON.parse(flowData);
 
       if (importData.nodes && importData.edges) {
         set({
           nodes: importData.nodes,
           edges: importData.edges,
+          projectSettings: {
+            ...state.projectSettings,
+            savedSinceEdits: true,
+            loadedId: id,
+            loadedName: name,
+          },
         });
       } else {
         throw new Error('Invalid JSON format: missing nodes or edges');
@@ -186,5 +297,35 @@ export const useFlowStore = create<AppState>((set, get) => ({
       console.error('Failed to import flow:', error);
       throw error;
     }
+  },
+  projectSettings: {
+    savedSinceEdits: false,
+  },
+  setProjectSavedValue: (savedValue: boolean) => {
+    const state = get();
+    set({
+      projectSettings: {
+        ...state.projectSettings,
+        savedSinceEdits: savedValue,
+      },
+    });
+  },
+  setProjectSettings: (id: string, name: string) => {
+    const state = get();
+    set({
+      projectSettings: {
+        ...state.projectSettings,
+        loadedId: id,
+        loadedName: name,
+        savedSinceEdits: true,
+      },
+    });
+  },
+  resetProjectSettings: () => {
+    set({
+      projectSettings: {
+        savedSinceEdits: false,
+      },
+    });
   },
 }));

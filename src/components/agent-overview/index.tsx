@@ -47,8 +47,6 @@ export const AgentOverview = ({ agent }: AgentOverviewProps) => {
       return;
     }
 
-    console.log('xxx');
-
     updateAgent({
       id,
       name,

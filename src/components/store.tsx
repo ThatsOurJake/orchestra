@@ -8,7 +8,7 @@ import testerPrompt from '../default-prompts/tester-prompt.txt?raw';
 import { createIndexedDBStorage } from '../utils/indexeddb-storage';
 
 type ImmerSet = Parameters<
-  StateCreator<Store, [['zustand/immer', never]], []>
+  StateCreator<MainStore, [['zustand/immer', never]], []>
 >[0];
 
 // TODO: Stop the default agents from being deleted
@@ -23,15 +23,18 @@ export interface StoredFlow {
   id: string;
   flowData: string;
   createdAt: number;
+  lastEditedAt?: number;
 }
 
-interface Store {
+export interface MainStore {
   agents: Agent[];
   storedFlows: StoredFlow[];
   removeAgent: (agentId: string) => void;
   addAgent: (agent: Omit<Agent, 'id'>) => void;
   updateAgent: (agent: Agent) => void;
   addFlow: (flow: StoredFlow) => void;
+  updateFlow: (flowId: string, flowData: string) => void;
+  deleteFlow: (flowId: string) => void;
 }
 
 const defaultAgents: Agent[] = [
@@ -84,7 +87,23 @@ const addFlow = (set: ImmerSet) => (flow: StoredFlow) =>
     state.storedFlows.push(flow);
   });
 
-export const useStore = create<Store>()(
+const updateFlow = (set: ImmerSet) => (flowId: string, flowData: string) =>
+  set((state) => {
+    const existingIndex = state.storedFlows.findIndex((x) => x.id === flowId);
+
+    if (existingIndex >= 0) {
+      state.storedFlows[existingIndex].flowData = flowData;
+      state.storedFlows[existingIndex].lastEditedAt = Date.now();
+    }
+  });
+
+const deleteFlow = (set: ImmerSet) => (flowId: string) =>
+  set((state) => {
+    const filtered = state.storedFlows.filter((x) => x.id !== flowId);
+    state.storedFlows = filtered;
+  });
+
+export const useStore = create<MainStore>()(
   devtools(
     persist(
       immer((set) => ({
@@ -94,12 +113,18 @@ export const useStore = create<Store>()(
         addAgent: addAgent(set),
         updateAgent: updateAgent(set),
         addFlow: addFlow(set),
+        updateFlow: updateFlow(set),
+        deleteFlow: deleteFlow(set),
       })),
       {
         name: 'orchestra-store',
         storage: createIndexedDBStorage({
           dbName: 'orchestra-db',
           storeName: 'orchestra-store',
+        }),
+        partialize: (state) => ({
+          agents: state.agents,
+          storedFlows: state.storedFlows,
         }),
       },
     ),
