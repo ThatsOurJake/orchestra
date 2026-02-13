@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useShallow } from 'zustand/shallow';
 import type {
   AgentResponseEvent,
@@ -18,7 +19,11 @@ const selector = (state: MainStore) => ({
   storedFlows: state.storedFlows,
 });
 
-export const CreationWindow = () => {
+interface CreationWindowProps {
+  autoLoadFlowId?: string | null;
+}
+
+export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
   const { storedFlows } = useStore(useShallow(selector));
   const {
     getMachine,
@@ -168,6 +173,15 @@ export const CreationWindow = () => {
             title: 'Parameter Input',
             label: `Enter value for: "${param.name}"`,
           });
+
+          if (!result) {
+            toast('User cancelled inputting parameters. Not executing flow', {
+              type: 'warning',
+            });
+            setChatState('not-started');
+            return;
+          }
+
           inputParams[param.name] = result;
         }
       }
@@ -221,6 +235,16 @@ export const CreationWindow = () => {
     },
     [reset, setLoadedFlow, setChatState],
   );
+
+  // Auto-load flow if flowId is provided via deep link
+  useEffect(() => {
+    if (autoLoadFlowId && chatState === 'not-started') {
+      const flow = storedFlows.find((f) => f.id === autoLoadFlowId);
+      if (flow) {
+        startFlow(flow);
+      }
+    }
+  }, [autoLoadFlowId, chatState, storedFlows, startFlow]);
 
   return (
     <div className="flex h-full w-full">

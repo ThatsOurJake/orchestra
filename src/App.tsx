@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { InputModal } from './components/input-modal';
 import { NavBar } from './components/nav-bar';
 import { Agents } from './routes/agents';
-import { Create } from './routes/create';
+import { Create } from './routes/chat';
 import { Flows } from './routes/flows';
 import { Overview } from './routes/overview';
 
@@ -15,7 +15,7 @@ const App = () => {
           <NavBar />
           <Routes>
             <Route path="/" Component={Overview} />
-            <Route path="/create" Component={Create} />
+            <Route path="/chat" Component={Create} />
             <Route path="/agents" Component={Agents} />
             <Route path="/flows" Component={Flows} />
           </Routes>

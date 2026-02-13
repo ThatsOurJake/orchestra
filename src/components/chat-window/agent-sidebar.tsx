@@ -1,18 +1,18 @@
 import type { StoreAgent } from './chat-window-store';
 
 interface AgentButtonProps {
-  isThinking: boolean;
+  state: StoreAgent['state'];
   agentName: string;
   onClick: () => void;
 }
 
-const AgentButton = ({ isThinking, agentName, onClick }: AgentButtonProps) => {
+const AgentButton = ({ state, agentName, onClick }: AgentButtonProps) => {
   return (
     <button
       type="button"
-      data-thinking={isThinking}
+      data-state={state}
       onClick={onClick}
-      className="border w-full py-1 cursor-pointer hover:underline rounded data-[thinking=true]:bg-green-100 data-[thinking=true]:border-green-300 data-[thinking=false]:bg-orange-100 data-[thinking=false]:border-orange-300"
+      className="border w-full py-1 cursor-pointer hover:underline rounded data-[state=working]:bg-green-100 data-[state=working]:border-green-300 data-[state=idle]:bg-orange-100 data-[state=idle]:border-orange-300 data-[state=loading]:bg-pink-100 data-[state=loading]:border-pink-300"
     >
       {agentName}
     </button>
@@ -77,7 +77,7 @@ export const AgentSidebar = ({
           <AgentButton
             agentName={agent.agentName}
             key={`agent-${agent.agentFlowId}`}
-            isThinking={agent.state === 'working'}
+            state={agent.state}
             onClick={() => onButtonClick(agent.agentFlowId)}
           />
         ))}

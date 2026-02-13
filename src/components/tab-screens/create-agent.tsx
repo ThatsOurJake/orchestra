@@ -42,7 +42,7 @@ export const CreateAgent = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter agent name..."
-          className="border border-amber-600 rounded px-3 py-2 focus:outline-none"
+          className="border border-amber-600 rounded px-3 py-2 focus:outline-none bg-white"
         />
       </div>
 
@@ -55,7 +55,7 @@ export const CreateAgent = () => {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Enter agent prompt..."
-          className="border border-amber-600 rounded px-3 py-2 min-h-96 max-h-96 overflow-y-auto focus:outline-none"
+          className="border border-amber-600 rounded px-3 py-2 min-h-96 max-h-96 overflow-y-auto focus:outline-none bg-white"
         />
       </div>
 

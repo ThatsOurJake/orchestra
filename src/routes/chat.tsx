@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import { CreationWindow } from '../components/tab-screens/chat-window';
 import { Tab } from '../components/tabs/tab';
 import { TabBar } from '../components/tabs/tab-bar';
@@ -6,13 +8,26 @@ import { TabScreen } from '../components/tabs/tab-screen';
 import { TabsWrapper } from '../components/tabs/wrapper';
 
 export const Create = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const flowId = searchParams.get('flowId');
+
+  // Clear flowId from URL after it's been read
+  useEffect(() => {
+    if (flowId) {
+      setSearchParams({});
+    }
+  }, [flowId, setSearchParams]);
+
   return (
     <TabsWrapper>
       <TabBar>
         <Tab title="Chat Window" />
       </TabBar>
       <TabContent>
-        <TabScreen component={CreationWindow} />
+        <TabScreen
+          component={CreationWindow}
+          componentProps={{ autoLoadFlowId: flowId }}
+        />
       </TabContent>
     </TabsWrapper>
   );

@@ -7,7 +7,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 export const NavBar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
@@ -18,7 +18,7 @@ export const NavBar = () => {
   }, [isOpen]);
 
   const onNewTicket = useCallback(() => {
-    navigate('/create');
+    navigate('/chat');
   }, [navigate]);
 
   const onAgentClick = useCallback(() => {
@@ -35,7 +35,9 @@ export const NavBar = () => {
     >
       <div className={`flex flex-col ${isOpen ? 'block' : 'hidden'} h-full `}>
         <div className="flex justify-between items-center w-full p-2">
-          <p className="whitespace-nowrap">Orchestra</p>
+          <Link to="/">
+            <p className="whitespace-nowrap">Orchestra</p>
+          </Link>
           <button onClick={toggleSidebar} type="button">
             <Icon
               path={mdiMenuOpen}

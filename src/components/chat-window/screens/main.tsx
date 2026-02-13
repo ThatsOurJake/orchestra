@@ -77,7 +77,6 @@ const AgentOutputDisplay = ({ agent }: { agent: StoreAgent }) => {
         return '🟢 Working';
       case 'loading':
         return '🩷 Loading';
-      case 'idle':
       default:
         return '🟠 Idle';
     }
