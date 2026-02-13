@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Orchestra
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A visual workflow automation tool that enables the creation and execution of AI-powered agent flows through an intuitive node-based interface.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Orchestra provides a flexible platform for designing and running automated workflows using AI agents. The application features a visual flow builder that allows users to construct complex logic chains through a node-based interface, similar to tools like n8n or Node-RED, but with a focus on AI agent orchestration.
 
-## React Compiler
+### Architecture
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+The application is built with React and TypeScript, utilizing:
 
-## Expanding the ESLint configuration
+- **React Flow** for the visual node-based editor
+- **Zustand** for state management
+- **Chevrotain** for custom language parsing and interpretation
+- **Vite** for build tooling and development server
+- **TailwindCSS** for styling
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js (version 18 or higher recommended)
+- pnpm package manager
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+Clone the repository and install dependencies:
+
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Start the development server:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm dev
+```
+
+The application will be available at `http://localhost:5173` (or the next available port).
+
+### Building for Production
+
+Create a production build:
+
+```bash
+pnpm build
+```
+
+Preview the production build locally:
+
+```bash
+pnpm preview
+```
+
+### Testing
+
+Run the test suite:
+
+```bash
+pnpm test
+```
+
+### Code Quality
+
+Format code:
+
+```bash
+pnpm format
+```
+
+Lint code:
+
+```bash
+pnpm lint
 ```
