@@ -83,13 +83,15 @@ export const AgentOverview = ({ agent }: AgentOverviewProps) => {
         >
           <p>Update Agent</p>
         </button>
-        <button
-          className="w-1/3 py-2 border border-black rounded cursor-pointer bg-red-300 hover:underline"
-          onClick={onDelete}
-          type="button"
-        >
-          <p>Delete Agent</p>
-        </button>
+        {!agent.id.includes('default') && (
+          <button
+            className="w-1/3 py-2 border border-black rounded cursor-pointer bg-red-300 hover:underline"
+            onClick={onDelete}
+            type="button"
+          >
+            <p>Delete Agent</p>
+          </button>
+        )}
       </div>
     </div>
   );

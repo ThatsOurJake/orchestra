@@ -29,6 +29,12 @@ export const EQ = createToken({
   longer_alt: Identifier,
 });
 
+export const TRIM = createToken({
+  name: 'TRIM',
+  pattern: /TRIM/,
+  longer_alt: Identifier,
+});
+
 export const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /\s+/,
@@ -72,6 +78,7 @@ export const allLangTokens = [
   EQ,
   NULL,
   NOT,
+  TRIM,
   Variable,
   // Other
   Identifier,

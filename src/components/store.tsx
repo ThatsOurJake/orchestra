@@ -107,7 +107,7 @@ export const useStore = create<MainStore>()(
   devtools(
     persist(
       immer((set) => ({
-        agents: defaultAgents,
+        agents: [],
         storedFlows: [],
         removeAgent: removeAgent(set),
         addAgent: addAgent(set),
@@ -125,6 +125,16 @@ export const useStore = create<MainStore>()(
         partialize: (state) => ({
           agents: state.agents,
           storedFlows: state.storedFlows,
+        }),
+        merge: (persistedState, currentState) => ({
+          ...currentState,
+          ...(persistedState as Partial<MainStore>),
+          // Only use defaultAgents if persisted agents don't exist or are empty
+          agents:
+            (persistedState as Partial<MainStore>)?.agents &&
+            (persistedState as Partial<MainStore>).agents!.length > 0
+              ? (persistedState as Partial<MainStore>).agents!
+              : defaultAgents,
         }),
       },
     ),

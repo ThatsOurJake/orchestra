@@ -78,8 +78,10 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
       funcName = 'NULL';
     } else if (ctx.NOT) {
       funcName = 'NOT';
-    } else {
+    } else if (ctx.EQ) {
       funcName = 'EQ';
+    } else {
+      funcName = 'TRIM';
     }
 
     const args = ctx.oneArgList
@@ -138,6 +140,9 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
         }
 
         return args[0] === args[1];
+      }
+      case 'TRIM': {
+        return `${args[0]}`.trim();
       }
     }
   }

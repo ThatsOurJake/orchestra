@@ -11,6 +11,7 @@ import {
   NULL,
   RightBracket,
   StringLiteral,
+  TRIM,
   Variable,
 } from './lexicon';
 
@@ -45,6 +46,7 @@ export class SyntaxParser extends CstParser {
           this.OR3([
             { ALT: () => this.CONSUME3(NULL) },
             { ALT: () => this.CONSUME4(NOT) },
+            { ALT: () => this.CONSUME5(TRIM) },
           ]);
           this.CONSUME2(LeftBracket);
           this.SUBRULE2(this.oneArgList);
