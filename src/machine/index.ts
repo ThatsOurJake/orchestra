@@ -13,12 +13,12 @@ import {
   isSendAgentMessageNode,
   isVariableNode,
 } from '../utils/flow-helpers';
-import { conditionalNodeHandler } from './handlers/conditionalNode';
-import { createAgentNodeHandler } from './handlers/createAgentNode';
-import { extractStringNodeHandler } from './handlers/extractStringNode';
-import { outputNodeHandler } from './handlers/outputNode';
-import { sendAgentMessageNodeHandler } from './handlers/sendAgentMessageNode';
-import { variableNodeHandler } from './handlers/variableNode';
+import { conditionalNodeHandler } from './handlers/conditional-node';
+import { createAgentNodeHandler } from './handlers/create-agent-node';
+import { extractStringNodeHandler } from './handlers/extract-string-node';
+import { outputNodeHandler } from './handlers/output-node';
+import { sendAgentMessageNodeHandler } from './handlers/send-agent-message-node';
+import { variableNodeHandler } from './handlers/variable-node';
 
 interface BaseEvent<T extends string> {
   type: T;
@@ -191,11 +191,6 @@ export class Machine {
   }
 
   public updateContextWithOutput(node: AppNodes, value: unknown) {
-    console.log(
-      `%cContext: %c${node.id}_output | ${value}`,
-      'color: red',
-      'color: white',
-    );
     this.context.set(`${node.id}_output`, value);
     this.context.set(PREV_OUTPUT_KEY, value);
   }
@@ -288,9 +283,27 @@ export class Machine {
 
   public async start() {
     console.log('Starting Machine');
+
+    if (this.context.size > 0) {
+      const contextStr = Array.from(this.context.entries())
+        .map((entry) => {
+          const [key, val] = entry;
+          return `- ${key} : ${val}`;
+        })
+        .join('\n');
+      this.triggerEvent('output', {
+        content: `Started flow with following parameters:\n${contextStr}`,
+      });
+    } else {
+      this.triggerEvent('output', {
+        content: `Started flow!`,
+      });
+    }
+
     while (!this.hasEnded) {
       await this.advance();
     }
+
     console.log('Done');
   }
 }

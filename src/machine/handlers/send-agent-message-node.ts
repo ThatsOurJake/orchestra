@@ -51,7 +51,7 @@ export const sendAgentMessageNodeHandler: MachineHandler<
     machine.triggerEvent('agentResponse', {
       agentFlowId: selectedAgent.agentFlowId,
       agentName: agentName,
-      response: agentResp,
+      response: agentResp.trim(),
     });
 
     machine.updateContextWithOutput(node, agentResp);
