@@ -9,6 +9,7 @@ import {
   LeftBracket,
   NOT,
   NULL,
+  REPL,
   RightBracket,
   StringLiteral,
   TRIM,
@@ -53,6 +54,14 @@ export class SyntaxParser extends CstParser {
           this.CONSUME2(RightBracket);
         },
       },
+      {
+        ALT: () => {
+          this.CONSUME(REPL);
+          this.CONSUME3(LeftBracket);
+          this.SUBRULE(this.threeOrFourArgList);
+          this.CONSUME3(RightBracket);
+        },
+      },
     ]);
   });
 
@@ -64,6 +73,18 @@ export class SyntaxParser extends CstParser {
     this.SUBRULE(this.expression);
     this.CONSUME(Comma);
     this.SUBRULE2(this.expression);
+  });
+
+  threeOrFourArgList = this.RULE('threeOrFourArgList', () => {
+    this.SUBRULE(this.expression);
+    this.CONSUME(Comma);
+    this.SUBRULE2(this.expression);
+    this.CONSUME2(Comma);
+    this.SUBRULE3(this.expression);
+    this.OPTION(() => {
+      this.CONSUME3(Comma);
+      this.SUBRULE4(this.expression);
+    });
   });
 
   value = this.RULE('value', () => {

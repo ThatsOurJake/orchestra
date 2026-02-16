@@ -35,6 +35,12 @@ export const TRIM = createToken({
   longer_alt: Identifier,
 });
 
+export const REPL = createToken({
+  name: 'REPL',
+  pattern: /REPL/,
+  longer_alt: Identifier,
+});
+
 export const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /\s+/,
@@ -79,6 +85,7 @@ export const allLangTokens = [
   NULL,
   NOT,
   TRIM,
+  REPL,
   Variable,
   // Other
   Identifier,

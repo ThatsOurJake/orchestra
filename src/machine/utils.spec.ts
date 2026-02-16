@@ -48,4 +48,23 @@ describe('replaceContextInStr', () => {
       '1st index Array: correct | Is true: true | Normal Replacement: hello there',
     );
   });
+
+  it('correctly use lang expression to replace inside a block message', () => {
+    const str = `Hello there
+\`\`\`test
+replace_me
+\`\`\``;
+    const regexedString = /```test\n([\s\S]*?)\n```/;
+    const match = regexedString.exec(str);
+    const context = new Map();
+    context.set('resp', str);
+    context.set('matches', match);
+
+    const result = replaceContextInStr(
+      '#REPL(%resp%, ARR(%matches%, 0), "")#',
+      context,
+    ).trim();
+
+    expect(result).toBe(`Hello there`);
+  });
 });

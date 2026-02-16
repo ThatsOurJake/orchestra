@@ -17,6 +17,14 @@ interface TwoArgListCstNode extends CstNode {
   };
 }
 
+interface ThreeOrFourArgListCstNode extends CstNode {
+  name: 'threeOrFourArgList';
+  children: {
+    expression: ExpressionCstNode[];
+    Comma?: IToken[];
+  };
+}
+
 interface ValueCstNode extends CstNode {
   name: 'value';
   children: {
@@ -34,9 +42,12 @@ interface FunctionalCallCstNode extends CstNode {
     NULL?: IToken[];
     NOT?: IToken[];
     EQ?: IToken[];
+    TRIM?: IToken[];
+    REPL?: IToken[];
     LeftBracket: IToken[];
-    oneArgList: OneArgListCstNode[];
-    twoArgList: TwoArgListCstNode[];
+    oneArgList?: OneArgListCstNode[];
+    twoArgList?: TwoArgListCstNode[];
+    threeOrFourArgList?: ThreeOrFourArgListCstNode[];
     RightBracket: IToken[];
   };
 }
@@ -80,13 +91,20 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
       funcName = 'NOT';
     } else if (ctx.EQ) {
       funcName = 'EQ';
-    } else {
+    } else if (ctx.TRIM) {
       funcName = 'TRIM';
+    } else if (ctx.REPL) {
+      funcName = 'REPL';
     }
 
-    const args = ctx.oneArgList
-      ? this.visit(ctx.oneArgList)
-      : this.visit(ctx.twoArgList);
+    let args: unknown[];
+    if (ctx.oneArgList) {
+      args = this.visit(ctx.oneArgList);
+    } else if (ctx.threeOrFourArgList) {
+      args = this.visit(ctx.threeOrFourArgList);
+    } else {
+      args = this.visit(ctx.twoArgList!);
+    }
 
     return this.executeFunction(funcName, args);
   }
@@ -96,6 +114,10 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
   }
 
   twoArgList(ctx: TwoArgListCstNode['children']) {
+    return ctx.expression.map((expr) => this.visit(expr));
+  }
+
+  threeOrFourArgList(ctx: ThreeOrFourArgListCstNode['children']) {
     return ctx.expression.map((expr) => this.visit(expr));
   }
 
@@ -143,6 +165,17 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
       }
       case 'TRIM': {
         return `${args[0]}`.trim();
+      }
+      case 'REPL': {
+        const input = args[0] as string;
+        const find = args[1] as string;
+        const replaceWith = args[2] as string;
+        const flags = args[3] as string | undefined;
+        const regex = new RegExp(
+          find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          flags || '',
+        );
+        return input.replace(regex, replaceWith);
       }
     }
   }

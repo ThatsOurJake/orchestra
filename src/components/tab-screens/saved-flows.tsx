@@ -3,8 +3,9 @@ import Icon from '@mdi/react';
 import { useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useShallow } from 'zustand/react/shallow';
+import { isCreateAgentNode } from '../../utils/flow-helpers';
 import { useFileImportModalStore } from '../file-import-modal/file-import-modal-store';
-import { type AppState, useFlowStore } from '../flow/flow-store';
+import { type AppNodes, type AppState, useFlowStore } from '../flow/flow-store';
 import { SavedFlowCard } from '../saved-flow-card';
 import { type MainStore, type StoredFlow, useStore } from '../store';
 import { useChangeTab } from '../tabs/context';
@@ -19,10 +20,11 @@ const mainStoreSelector = (state: MainStore) => ({
   storedFlows: state.storedFlows,
   deleteFlow: state.deleteFlow,
   addFlow: state.addFlow,
+  agents: state.agents,
 });
 
 export const SavedFlows = () => {
-  const { storedFlows, deleteFlow, addFlow } = useStore(
+  const { storedFlows, deleteFlow, addFlow, agents } = useStore(
     useShallow(mainStoreSelector),
   );
   const { projectSettings, nodes, importFlowData } = useFlowStore(
@@ -85,6 +87,27 @@ export const SavedFlows = () => {
         return;
       }
 
+      const parsedFlowData = JSON.parse(flow.flowData) as { nodes: AppNodes[] };
+      const agentNodes = parsedFlowData.nodes.filter((x) =>
+        isCreateAgentNode(x),
+      );
+
+      for (const node of agentNodes) {
+        const agentId = node.data.selectedAgent?.agent.id;
+        const foundAgent = agents.find((x) => x.id === agentId);
+
+        if (!foundAgent) {
+          console.warn(`Cannot find agent by id: ${agentId}`);
+          continue;
+        }
+
+        // The prompt could change but the one stored is a snapshot of the time of creation, so we update it at time of export.
+        node.data.selectedAgent!.agent.prompt = foundAgent.prompt;
+        node.data.selectedAgent!.agent.name = foundAgent.name;
+      }
+
+      flow.flowData = JSON.stringify(parsedFlowData);
+
       const dataStr = JSON.stringify(flow, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
@@ -94,7 +117,7 @@ export const SavedFlows = () => {
       link.click();
       URL.revokeObjectURL(url);
     },
-    [storedFlows],
+    [storedFlows, agents],
   );
 
   const onImport = useCallback(async () => {

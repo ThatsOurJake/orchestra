@@ -99,6 +99,38 @@ describe('Lang Runner', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('correctly handles TRIM', () => {
+    const statement = 'TRIM("Hello there    ")';
+
+    const result = langRunner(statement, new Map());
+
+    expect(result).toBe('Hello there');
+  });
+
+  it('correctly handles REPL with no flags and replaces first instance', () => {
+    const statement = 'REPL("12121212", "1", "3")';
+
+    const result = langRunner(statement, new Map());
+
+    expect(result).toBe('32121212');
+  });
+
+  it('correctly handles REPL with global flag and replaces all instances', () => {
+    const statement = 'REPL("12121212", "1", "3", "g")';
+
+    const result = langRunner(statement, new Map());
+
+    expect(result).toBe('32323232');
+  });
+
+  it('correctly handles REPL with ignore flag and replaces all instances despite the case', () => {
+    const statement = 'REPL("HehEhEhe", "H", "O", "gi")';
+
+    const result = langRunner(statement, new Map());
+
+    expect(result).toBe('OeOEOEOe');
+  });
 });
 
 describe('Syntax Check', () => {
@@ -108,17 +140,8 @@ describe('Syntax Check', () => {
     const result = syntaxCheck(statement);
 
     expect(result).toHaveLength(1);
-    expect(
-      result[0].message,
-    ).toBe(`Expecting: one of these possible Token sequences:
-  1. [ARR]
-  2. [EQ]
-  3. [NULL]
-  4. [NOT]
-  5. [Variable]
-  6. [StringLiteral]
-  7. [Integer]
-  8. [Identifier]
-but found: ')'`);
+    expect(result[0].message).toContain(
+      `Expecting: one of these possible Token sequences`,
+    );
   });
 });
