@@ -1,33 +1,19 @@
 import {
+  mdiChatOutline,
   mdiFaceAgent,
   mdiMenuClose,
   mdiMenuOpen,
-  mdiPlusBox,
   mdiSitemapOutline,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { useCallback, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 
 export const NavBar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const navigate = useNavigate();
-
   const toggleSidebar = useCallback(() => {
     setIsOpen(!isOpen);
   }, [isOpen]);
-
-  const onNewTicket = useCallback(() => {
-    navigate('/chat');
-  }, [navigate]);
-
-  const onAgentClick = useCallback(() => {
-    navigate('/agents');
-  }, [navigate]);
-
-  const onFlowClick = useCallback(() => {
-    navigate('/flows');
-  }, [navigate]);
 
   return (
     <nav
@@ -49,34 +35,31 @@ export const NavBar = () => {
         </div>
         <div className="h-px mt-1 bg-orange-300" />
         <div className="flex mt-2">
-          <button
+          <Link
+            to="/agents"
             className="flex gap-x-1 justify-between items-center cursor-pointer hover:bg-gray-600 rounded-sm w-full p-2"
-            onClick={onAgentClick}
-            type="button"
           >
             <p className="whitespace-nowrap">Agents</p>
             <Icon path={mdiFaceAgent} size={1} color="#ffffff" />
-          </button>
+          </Link>
         </div>
         <div className="flex mt-2">
-          <button
+          <Link
+            to="/flows"
             className="flex gap-x-1 justify-between items-center cursor-pointer hover:bg-gray-600 rounded-sm w-full p-2"
-            onClick={onFlowClick}
-            type="button"
           >
             <p className="whitespace-nowrap">Flows</p>
             <Icon path={mdiSitemapOutline} size={1} color="#ffffff" />
-          </button>
+          </Link>
         </div>
         <div className="flex mt-2">
-          <button
+          <Link
+            to="/chat"
             className="flex gap-x-1 justify-between items-center cursor-pointer hover:bg-gray-600 rounded-sm w-full p-2"
-            onClick={onNewTicket}
-            type="button"
           >
-            <p className="whitespace-nowrap">New Chat</p>
-            <Icon path={mdiPlusBox} size={1} color="#ffffff" />
-          </button>
+            <p className="whitespace-nowrap">Chat</p>
+            <Icon path={mdiChatOutline} size={1} color="#ffffff" />
+          </Link>
         </div>
       </div>
       <div className={`flex flex-col ${isOpen ? 'hidden' : 'block'}`}>
@@ -94,30 +77,19 @@ export const NavBar = () => {
           />
         </button>
         <div className="h-px mt-1 bg-orange-300" />
-        <button
-          className="cursor-pointer p-2 mt-2"
-          onClick={onAgentClick}
-          title="Agents"
-          type="button"
-        >
+        <Link className="cursor-pointer p-2 mt-2" to="/agents" title="Agents">
           <Icon path={mdiFaceAgent} size={1} color="#ffffff" />
-        </button>
-        <button
-          className="cursor-pointer p-2 mt-2"
-          onClick={onFlowClick}
+        </Link>
+        <Link
+          className="inline-block cursor-pointer p-2 mt-2"
+          to="/flows"
           title="Flows"
-          type="button"
         >
           <Icon path={mdiSitemapOutline} size={1} color="#ffffff" />
-        </button>
-        <button
-          className="cursor-pointer p-2 mt-2"
-          onClick={onNewTicket}
-          title="New Chat"
-          type="button"
-        >
-          <Icon path={mdiPlusBox} size={1} color="#ffffff" />
-        </button>
+        </Link>
+        <Link className="cursor-pointer p-2 mt-2" to="/chat" title="Chat">
+          <Icon path={mdiChatOutline} size={1} color="#ffffff" />
+        </Link>
       </div>
     </nav>
   );

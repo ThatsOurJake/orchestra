@@ -74,7 +74,7 @@ export const Overview = () => {
           to="/chat"
           className="bg-white border-2 border-orange-500 rounded-lg p-6 hover:bg-orange-50 transition-colors text-center"
         >
-          <p className="text-lg font-semibold text-orange-700">New Chat</p>
+          <p className="text-lg font-semibold text-orange-700">Chat</p>
           <p className="text-sm text-gray-600 mt-1">Start a new workflow</p>
         </Link>
       </div>
