@@ -1,3 +1,4 @@
+import { OutputDisplay } from '../../output-display';
 import type { StoredFlow } from '../../store';
 import type { ChatStates, MainOutput, StoreAgent } from '../chat-window-store';
 import { FlowSelection } from './flow-selection';
@@ -49,23 +50,11 @@ const MainOutputDisplay = ({
         </div>
       )}
 
-      <div className="flex-1 space-y-3">
-        {outputs.length === 0 && !error && (
-          <p className="text-gray-500 italic">No outputs yet...</p>
-        )}
+      <OutputDisplay outputs={outputs} />
 
-        {outputs.map((output, index) => (
-          <div
-            key={`output-${output.timestamp}-${index}`}
-            className="bg-gray-100 border border-gray-300 p-3 rounded"
-          >
-            <p className="whitespace-pre-wrap">{output.content}</p>
-            <span className="text-xs text-gray-500 mt-2 block">
-              {new Date(output.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-        ))}
-      </div>
+      {chatState === 'ended' && !error && (
+        <p className="text-center py-2 text-sm font-bold">Flow has finished</p>
+      )}
     </div>
   );
 };

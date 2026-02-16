@@ -26,15 +26,30 @@ export interface StoredFlow {
   lastEditedAt?: number;
 }
 
+export interface ChatHistoryOutput {
+  content: string;
+  timestamp: number;
+}
+
+export interface ChatHistory {
+  id: string;
+  flowName: string;
+  completedAt: number;
+  outputs: ChatHistoryOutput[];
+}
+
 export interface MainStore {
   agents: Agent[];
   storedFlows: StoredFlow[];
+  chatHistory: ChatHistory[];
   removeAgent: (agentId: string) => void;
   addAgent: (agent: Omit<Agent, 'id'>) => void;
   updateAgent: (agent: Agent) => void;
   addFlow: (flow: StoredFlow) => void;
   updateFlow: (flowId: string, flowData: string) => void;
   deleteFlow: (flowId: string) => void;
+  addChatHistory: (history: Omit<ChatHistory, 'id' | 'completedAt'>) => void;
+  deleteChatHistory: (historyId: string) => void;
 }
 
 const defaultAgents: Agent[] = [
@@ -103,18 +118,38 @@ const deleteFlow = (set: ImmerSet) => (flowId: string) =>
     state.storedFlows = filtered;
   });
 
+const addChatHistory =
+  (set: ImmerSet) => (history: Omit<ChatHistory, 'id' | 'completedAt'>) =>
+    set((state) => {
+      const completeChatHistory: ChatHistory = {
+        ...history,
+        id: crypto.randomUUID(),
+        completedAt: Date.now(),
+      };
+
+      state.chatHistory.push(completeChatHistory);
+    });
+
+const deleteChatHistory = (set: ImmerSet) => (historyId: string) =>
+  set((state) => {
+    state.chatHistory = state.chatHistory.filter((x) => x.id !== historyId);
+  });
+
 export const useStore = create<MainStore>()(
   devtools(
     persist(
       immer((set) => ({
         agents: [],
         storedFlows: [],
+        chatHistory: [],
         removeAgent: removeAgent(set),
         addAgent: addAgent(set),
         updateAgent: updateAgent(set),
         addFlow: addFlow(set),
         updateFlow: updateFlow(set),
         deleteFlow: deleteFlow(set),
+        addChatHistory: addChatHistory(set),
+        deleteChatHistory: deleteChatHistory(set),
       })),
       {
         name: 'orchestra-store',
@@ -125,17 +160,20 @@ export const useStore = create<MainStore>()(
         partialize: (state) => ({
           agents: state.agents,
           storedFlows: state.storedFlows,
+          chatHistory: state.chatHistory,
         }),
-        merge: (persistedState, currentState) => ({
-          ...currentState,
-          ...(persistedState as Partial<MainStore>),
-          // Only use defaultAgents if persisted agents don't exist or are empty
-          agents:
-            (persistedState as Partial<MainStore>)?.agents &&
-            (persistedState as Partial<MainStore>).agents!.length > 0
-              ? (persistedState as Partial<MainStore>).agents!
-              : defaultAgents,
-        }),
+        merge: (persistedState, currentState) => {
+          const persisted = persistedState as Partial<MainStore>;
+          return {
+            ...currentState,
+            ...persisted,
+            // Only use defaultAgents if persisted agents don't exist or are empty
+            agents:
+              persisted?.agents && persisted.agents.length > 0
+                ? persisted.agents
+                : defaultAgents,
+          };
+        },
       },
     ),
   ),

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
+import { ChatHistoryScreen } from '../components/tab-screens/chat-history';
 import { CreationWindow } from '../components/tab-screens/chat-window';
 import { Tab } from '../components/tabs/tab';
 import { TabBar } from '../components/tabs/tab-bar';
@@ -22,12 +23,14 @@ export const Create = () => {
     <TabsWrapper>
       <TabBar>
         <Tab title="Chat Window" />
+        <Tab title="History" />
       </TabBar>
       <TabContent>
         <TabScreen
           component={CreationWindow}
           componentProps={{ autoLoadFlowId: flowId }}
         />
+        <TabScreen component={ChatHistoryScreen} />
       </TabContent>
     </TabsWrapper>
   );

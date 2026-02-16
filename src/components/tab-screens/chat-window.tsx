@@ -17,6 +17,7 @@ import { type MainStore, type StoredFlow, useStore } from '../store';
 
 const selector = (state: MainStore) => ({
   storedFlows: state.storedFlows,
+  addChatHistory: state.addChatHistory,
 });
 
 interface CreationWindowProps {
@@ -24,7 +25,7 @@ interface CreationWindowProps {
 }
 
 export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
-  const { storedFlows } = useStore(useShallow(selector));
+  const { storedFlows, addChatHistory } = useStore(useShallow(selector));
   const {
     getMachine,
     machineId,
@@ -83,6 +84,17 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
         const errorMessage = `Error in node ${event.data.err.nodeId}: ${event.data.err.message}`;
         console.error(errorMessage);
         setFlowError(errorMessage);
+      } else {
+        // Only save to history if there was no error
+        if (loadedFlow && mainOutputs.length > 0) {
+          addChatHistory({
+            flowName: loadedFlow.name,
+            outputs: mainOutputs.map((output) => ({
+              content: output.content,
+              timestamp: output.timestamp,
+            })),
+          });
+        }
       }
 
       setChatState('ended');
@@ -143,6 +155,9 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     setFlowError,
     updateAgentWorkingState,
     updateAgentState,
+    loadedFlow,
+    mainOutputs,
+    addChatHistory,
   ]);
 
   // Handle parameter collection and Machine creation
