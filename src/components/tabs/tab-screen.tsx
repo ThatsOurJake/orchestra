@@ -13,7 +13,7 @@ export const TabScreen = ({
   isVisible,
 }: TabScreenProps) => {
   return (
-    <div className={`${isVisible ? 'block' : 'hidden'} h-full w-full`}>
+    <div className={`${isVisible ? 'block' : 'hidden'} h-full w-full min-w-0`}>
       {React.createElement(component, componentProps)}
     </div>
   );

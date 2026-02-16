@@ -21,7 +21,7 @@ export const TabContent = ({ children }: TabContentProps) => {
   );
 
   return (
-    <div className="p-2 bg-gray-200 h-full overflow-y-auto text-black">
+    <div className="p-2 bg-gray-200 h-full overflow-y-auto overflow-x-hidden text-black">
       {remapped}
     </div>
   );
