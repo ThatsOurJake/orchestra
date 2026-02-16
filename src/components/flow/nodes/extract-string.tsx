@@ -51,7 +51,6 @@ export const ExtractStringNode = ({
       } = e;
       updateExtractStringNode(id, { from, regex: value });
 
-      // Restore cursor position after React re-renders
       requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(selectionStart, selectionEnd);

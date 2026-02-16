@@ -167,7 +167,6 @@ export const useStore = create<MainStore>()(
           return {
             ...currentState,
             ...persisted,
-            // Only use defaultAgents if persisted agents don't exist or are empty
             agents:
               persisted?.agents && persisted.agents.length > 0
                 ? persisted.agents

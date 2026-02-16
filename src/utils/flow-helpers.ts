@@ -1,5 +1,6 @@
 import { type Edge, getIncomers } from '@xyflow/react';
 import type { AppNodes } from '../components/flow/flow-store';
+import type { AskForInputNodeProps } from '../components/flow/nodes/ask-for-input';
 import type { ConditionalNodeProps } from '../components/flow/nodes/conditional';
 import type { CreateAgentNodeProps } from '../components/flow/nodes/create-agent';
 import type { ExtractStringNodeProps } from '../components/flow/nodes/extract-string';
@@ -54,6 +55,10 @@ export const isOutputNode = (node: AppNodes): node is OutputNodeProps =>
 export const isEndNode = (node: AppNodes): node is OutputNodeProps =>
   node.type === 'endNode';
 
+export const isAskForInputNode = (
+  node: AppNodes,
+): node is AskForInputNodeProps => node.type === 'askForInput';
+
 export const walkBackFindingNodeType = (
   nodeType: AppNodes['type'][],
   startId: string,
@@ -94,7 +99,13 @@ export const determineContextKeysFromNode = (
   edgesList: Edge[] = [],
 ) => {
   const { found: dataSettingNodes } = walkBackFindingNodeType(
-    ['parameters', 'sendMessageToAgent', 'extractString', 'variable'],
+    [
+      'parameters',
+      'sendMessageToAgent',
+      'extractString',
+      'variable',
+      'askForInput',
+    ],
     startId,
     nodesList,
     edgesList,
@@ -109,7 +120,11 @@ export const determineContextKeysFromNode = (
         }
       }
 
-      if (isSendAgentMessageNode(current) || isExtractStringNode(current)) {
+      if (
+        isSendAgentMessageNode(current) ||
+        isExtractStringNode(current) ||
+        isAskForInputNode(current)
+      ) {
         acc.push([`${current.id}_output`, 'string']);
       }
 

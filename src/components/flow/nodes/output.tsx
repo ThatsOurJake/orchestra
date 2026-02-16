@@ -69,7 +69,6 @@ export const OutputNode = ({
 
       updateOutputNode(id, value);
 
-      // Restore cursor position and scroll position after React re-renders
       requestAnimationFrame(() => {
         if (textareaRef.current) {
           textareaRef.current.setSelectionRange(selectionStart, selectionEnd);

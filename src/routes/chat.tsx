@@ -12,7 +12,6 @@ export const Create = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const flowId = searchParams.get('flowId');
 
-  // Clear flowId from URL after it's been read
   useEffect(() => {
     if (flowId) {
       setSearchParams({});

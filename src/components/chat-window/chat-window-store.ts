@@ -4,9 +4,8 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { Machine } from '../../machine';
 import type { AppNodes } from '../flow/flow-store';
-import type { StoredFlow } from '../store';
+import { type StoredFlow, useStore } from '../store';
 
-// Store the Machine instance outside of Zustand to avoid Immer proxy issues
 let machineInstance: Machine | null = null;
 
 export interface StoreAgent {
@@ -34,7 +33,7 @@ export type ChatStates =
 
 export type ChatWindowStore = {
   getMachine: () => Machine | null;
-  machineId: number; // Changes when machine is created to trigger effect re-run
+  machineId: number;
   activeAgents: StoreAgent[];
   activeTab: string;
   chatState: ChatStates;
@@ -152,15 +151,17 @@ const createMachine = async (inputParameters: Record<string, unknown>) => {
 
   const { Machine } = await import('../../machine');
 
+  const agents = useStore.getState().agents;
+
   const machine = new Machine(
     state.loadedFlow.nodes,
     state.loadedFlow.edges,
     inputParameters,
+    agents,
   );
 
   machineInstance = machine;
 
-  // Update machineId to trigger effect re-run
   useChatWindowStore.setState((state) => {
     state.machineId = Date.now();
   });

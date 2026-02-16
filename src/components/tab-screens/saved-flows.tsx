@@ -118,7 +118,6 @@ export const SavedFlows = () => {
       return;
     }
 
-    // We will remove lastEdit and use the current createdAt time as this flow is now the users
     result.createdAt = Date.now();
     if (result.lastEditedAt) {
       result.lastEditedAt = undefined;

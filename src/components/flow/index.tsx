@@ -6,6 +6,7 @@ import { nodeIdHelper } from '../../utils/flow-helpers';
 import { useCurrentTab } from '../tabs/context';
 
 import { type AppNodes, type AppState, useFlowStore } from './flow-store';
+import { AskForInputNode } from './nodes/ask-for-input';
 import { ConditionalNode } from './nodes/conditional';
 import { CreateAgentNode } from './nodes/create-agent';
 import { EndNode } from './nodes/end';
@@ -27,6 +28,7 @@ const nodeTypes = {
   endNode: EndNode,
   variable: VariableNode,
   outputNode: OutputNode,
+  askForInput: AskForInputNode,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -108,7 +110,6 @@ export const Flow = () => {
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      // Don't intercept copy/paste if user is typing in an input or textarea
       const target = event.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         return;

@@ -35,7 +35,6 @@ export const InputModal = () => {
     setValue('');
   }, [closeModal]);
 
-  // Reset value when modal opens with a new defaultValue
   const handleOpenChangeWithReset = useCallback(
     (open: boolean) => {
       if (open && defaultValue !== undefined) {

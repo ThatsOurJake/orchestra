@@ -97,7 +97,6 @@ const ChatHistoryItem = ({ history, onDelete }: ChatHistoryItemProps) => {
 export const ChatHistoryScreen = () => {
   const { chatHistory, deleteChatHistory } = useStore(useShallow(selector));
 
-  // Sort by most recent first
   const sortedHistory = [...chatHistory].sort(
     (a, b) => b.completedAt - a.completedAt,
   );

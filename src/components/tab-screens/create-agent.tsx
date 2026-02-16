@@ -21,7 +21,6 @@ export const CreateAgent = () => {
       type: 'success',
     });
 
-    // Clear form
     setName('');
     setPrompt('');
   }, [name, prompt, addAgent]);

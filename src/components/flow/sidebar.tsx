@@ -70,7 +70,6 @@ export const Sidebar = () => {
         return;
       }
 
-      // Calculate center position of screen in flow coordinates
       const { innerWidth, innerHeight } = window;
       const centerPosition = screenToFlowPosition({
         x: innerWidth / 2,
@@ -205,6 +204,9 @@ export const Sidebar = () => {
         </ToolkitNode>
         <ToolkitNode nodeType="variable" onClick={handleClick}>
           <p>Variable</p>
+        </ToolkitNode>
+        <ToolkitNode nodeType="askForInput" onClick={handleClick}>
+          <p>Ask for User Input</p>
         </ToolkitNode>
         <ToolkitNode nodeType="outputNode" onClick={handleClick}>
           <p>Output to main</p>

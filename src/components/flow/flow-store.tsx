@@ -18,6 +18,7 @@ import {
   isVariableNode,
 } from '../../utils/flow-helpers';
 import type { Agent, StoredFlow } from '../store';
+import type { AskForInputNodeProps } from './nodes/ask-for-input';
 import type { ConditionalNodeProps } from './nodes/conditional';
 import type { CreateAgentNodeProps } from './nodes/create-agent';
 import type { EndNodeProps } from './nodes/end';
@@ -35,7 +36,8 @@ export type AppNodes =
   | ExtractStringNodeProps
   | EndNodeProps
   | VariableNodeProps
-  | OutputNodeProps;
+  | OutputNodeProps
+  | AskForInputNodeProps;
 
 export type AppState = {
   nodes: AppNodes[];
@@ -69,6 +71,7 @@ export type AppState = {
     data: { name: string; value: string },
   ) => void;
   updateOutputNode: (nodeId: string, messageContent: string) => void;
+  updateAskForInputNode: (nodeId: string, data: { question: string }) => void;
   projectSettings: {
     savedSinceEdits: boolean;
     loadedId?: string;
@@ -248,6 +251,20 @@ export const useFlowStore = create<AppState>((set, get) => ({
           return {
             ...node,
             data: { ...node.data, messageContent },
+          };
+        }
+
+        return node;
+      }),
+    });
+  },
+  updateAskForInputNode: (nodeId: string, data: { question: string }) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId && node.type === 'askForInput') {
+          return {
+            ...node,
+            data: { ...node.data, question: data.question },
           };
         }
 

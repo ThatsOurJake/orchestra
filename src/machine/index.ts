@@ -4,7 +4,9 @@ import type {
   Parameter,
   ParametersNodeProps,
 } from '../components/flow/nodes/parameters';
+import type { Agent } from '../components/store';
 import {
+  isAskForInputNode,
   isConditionalNode,
   isCreateAgentNode,
   isEndNode,
@@ -13,6 +15,7 @@ import {
   isSendAgentMessageNode,
   isVariableNode,
 } from '../utils/flow-helpers';
+import { askForInputNodeHandler } from './handlers/ask-for-input-node';
 import { conditionalNodeHandler } from './handlers/conditional-node';
 import { createAgentNodeHandler } from './handlers/create-agent-node';
 import { extractStringNodeHandler } from './handlers/extract-string-node';
@@ -67,13 +70,21 @@ export interface AgentStateEvent extends BaseEvent<'agentState'> {
   };
 }
 
+export interface AskForInputEvent extends BaseEvent<'askForInput'> {
+  data: {
+    nodeId: string;
+    question: string;
+  };
+}
+
 type EventTypes =
   | CreateAgentEvent
   | OutputEvent
   | EndEvent
   | AgentResponseEvent
   | AgentWorkingStateEvent
-  | AgentStateEvent;
+  | AgentStateEvent
+  | AskForInputEvent;
 type EventNames = EventTypes['type'];
 type Handler = (event: EventTypes) => void;
 
@@ -84,14 +95,18 @@ interface MachineError {
 
 export const PREV_OUTPUT_KEY = 'prev_output';
 
+type MachineState = 'running' | 'awaiting-input' | 'ended';
+
 export class Machine {
   public nodes: AppNodes[];
   public edges: Edge[];
+  public agents: Agent[];
 
   private startingNode: ParametersNodeProps;
   private prevNode: AppNodes | null = null;
-  private hasEnded: boolean = false;
+  public hasEnded: boolean = false;
   private manualNextNode: AppNodes | null = null;
+  private state: MachineState = 'running';
 
   public context: Map<string, unknown> = new Map();
 
@@ -102,15 +117,18 @@ export class Machine {
     agentResponse: [],
     agentWorkingState: [],
     agentState: [],
+    askForInput: [],
   };
 
   constructor(
     nodes: AppNodes[],
     edges: Edge[],
     inputParameters: Record<string, unknown> = {},
+    agents: Agent[] = [],
   ) {
     this.nodes = nodes;
     this.edges = edges;
+    this.agents = agents;
 
     const startingNode = this.nodes.find((x) => x.type === 'parameters');
 
@@ -195,6 +213,45 @@ export class Machine {
     this.context.set(PREV_OUTPUT_KEY, value);
   }
 
+  private async processUntilInputOrEnd() {
+    while (!this.hasEnded && this.state !== 'awaiting-input') {
+      await this.advance();
+    }
+  }
+
+  public async provideInput(nodeId: string, input: string) {
+    if (this.hasEnded) {
+      console.warn('Cannot provide input - flow has ended');
+      return;
+    }
+
+    if (this.state !== 'awaiting-input') {
+      console.warn('Machine is not awaiting input');
+      return;
+    }
+
+    const node = this.nodes.find((n) => n.id === nodeId);
+
+    if (!node) {
+      console.error(`Node ${nodeId} not found`);
+      return;
+    }
+
+    if (!isAskForInputNode(node)) {
+      console.error(`Node ${nodeId} is not an askForInput node`);
+      return;
+    }
+
+    this.updateContextWithOutput(node, input);
+
+    this.triggerEvent('output', {
+      content: `User responded: ${input}`,
+    });
+
+    this.state = 'running';
+    await this.processUntilInputOrEnd();
+  }
+
   private async handleNode(node: AppNodes) {
     if (isCreateAgentNode(node)) {
       await createAgentNodeHandler(node, this);
@@ -223,6 +280,11 @@ export class Machine {
 
     if (isOutputNode(node)) {
       outputNodeHandler(node, this);
+      return;
+    }
+
+    if (isAskForInputNode(node)) {
+      askForInputNodeHandler(node, this);
       return;
     }
 
@@ -274,8 +336,13 @@ export class Machine {
     this.manualNextNode = nextNode;
   }
 
+  public setAwaitingInput() {
+    this.state = 'awaiting-input';
+  }
+
   public triggerEnd(err?: MachineError) {
     this.hasEnded = true;
+    this.state = 'ended';
     this.triggerEvent('end', {
       err,
     });
@@ -300,10 +367,7 @@ export class Machine {
       });
     }
 
-    while (!this.hasEnded) {
-      await this.advance();
-    }
-
+    await this.processUntilInputOrEnd();
     console.log('Done');
   }
 }

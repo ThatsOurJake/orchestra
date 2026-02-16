@@ -59,7 +59,6 @@ export const ConditionalNode = ({
       } = e;
       updateConditionalNode(id, value);
 
-      // Restore cursor position after React re-renders
       requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(selectionStart, selectionEnd);

@@ -101,8 +101,14 @@ export const SendMessageToAgentNode = ({
       const {
         target: { value },
       } = e;
+      const foundAgent = mappedAgents.find((x) => x.agentFlowId === value);
+
+      if (!foundAgent) {
+        return;
+      }
+
       updateSendAgentMessageNode(id, {
-        selectedAgent: mappedAgents.find((x) => x.agentFlowId === value)!,
+        selectedAgent: foundAgent,
         messageContent,
       });
     },
@@ -144,7 +150,6 @@ export const SendMessageToAgentNode = ({
         messageContent: value,
       });
 
-      // Restore cursor position and scroll position after React re-renders
       requestAnimationFrame(() => {
         if (textareaRef.current) {
           textareaRef.current.setSelectionRange(selectionStart, selectionEnd);

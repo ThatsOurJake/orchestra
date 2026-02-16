@@ -42,7 +42,6 @@ export const useTextInsert = <T extends HTMLInputElement | HTMLTextAreaElement>(
 
       onValueChange(newValue);
 
-      // Set cursor position after the inserted text
       requestAnimationFrame(() => {
         if (ref.current) {
           ref.current.focus();

@@ -1,10 +1,12 @@
 import { useCallback, useEffect } from 'react';
+import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 import { useShallow } from 'zustand/shallow';
 import type {
   AgentResponseEvent,
   AgentStateEvent,
   AgentWorkingStateEvent,
+  AskForInputEvent,
   CreateAgentEvent,
   EndEvent,
   OutputEvent,
@@ -49,6 +51,27 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
   } = useChatWindowStore();
   const { openModal } = useInputModalStore();
 
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      (chatState === 'in-progress' || chatState === 'waiting-for-parameters') &&
+      currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      const shouldLeave = window.confirm(
+        'A flow is currently running. Are you sure you want to leave? All progress will be lost.',
+      );
+
+      if (shouldLeave) {
+        reset();
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker, reset]);
+
   const onSidebarClick = useCallback(
     (id: string) => {
       setActiveTab(id);
@@ -56,7 +79,6 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     [setActiveTab],
   );
 
-  // Set up Machine event listeners
   useEffect(() => {
     const machine = getMachine();
 
@@ -85,7 +107,6 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
         console.error(errorMessage);
         setFlowError(errorMessage);
       } else {
-        // Only save to history if there was no error
         if (loadedFlow && mainOutputs.length > 0) {
           addChatHistory({
             flowName: loadedFlow.name,
@@ -102,32 +123,42 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
 
     const onAgentResponse = (event: AgentResponseEvent) => {
       const { agentFlowId, agentName, response } = event.data;
-
-      // Ensure agent exists in store
       addAgent(agentFlowId, agentName);
-
-      // Add the response to the agent's outputs
       addAgentOutput(agentFlowId, response);
     };
 
     const onAgentWorkingState = (event: AgentWorkingStateEvent) => {
       const { agentFlowId, agentName, isWorking } = event.data;
-
-      // Ensure agent exists in store
       addAgent(agentFlowId, agentName);
-
-      // Update working state
       updateAgentWorkingState(agentFlowId, isWorking);
     };
 
     const onAgentState = (event: AgentStateEvent) => {
       const { agentFlowId, agentName, state } = event.data;
-
-      // Ensure agent exists in store
       addAgent(agentFlowId, agentName);
-
-      // Update agent state
       updateAgentState(agentFlowId, state);
+    };
+
+    const onAskForInput = async (event: AskForInputEvent) => {
+      const { nodeId, question } = event.data;
+
+      const userInput = await openModal({
+        title: 'Input Required',
+        label: question,
+      });
+
+      if (!userInput) {
+        toast('User cancelled input. Flow cannot continue.', {
+          type: 'warning',
+        });
+        machine.triggerEnd({
+          message: 'User cancelled input',
+          nodeId,
+        });
+        return;
+      }
+
+      await machine.provideInput(nodeId, userInput);
     };
 
     machine.addEventListener('createAgent', onCreateAgent);
@@ -136,14 +167,20 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     machine.addEventListener('agentResponse', onAgentResponse);
     machine.addEventListener('agentWorkingState', onAgentWorkingState);
     machine.addEventListener('agentState', onAgentState);
+    machine.addEventListener('askForInput', onAskForInput);
 
     return () => {
+      console.log(
+        '[Effect] Cleaning up event listeners for machineId:',
+        machineId,
+      );
       machine.removeEventListener('createAgent', onCreateAgent);
       machine.removeEventListener('output', onOutput);
       machine.removeEventListener('end', onEnd);
       machine.removeEventListener('agentResponse', onAgentResponse);
       machine.removeEventListener('agentWorkingState', onAgentWorkingState);
       machine.removeEventListener('agentState', onAgentState);
+      machine.removeEventListener('askForInput', onAskForInput);
     };
   }, [
     machineId,
@@ -158,9 +195,17 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     loadedFlow,
     mainOutputs,
     addChatHistory,
+    openModal,
   ]);
 
-  // Handle parameter collection and Machine creation
+  useEffect(() => {
+    const cleanupReset = reset;
+    return () => {
+      console.log('[Effect] Component unmounting, resetting state');
+      cleanupReset();
+    };
+  }, [reset]);
+
   useEffect(() => {
     if (chatState !== 'waiting-for-parameters' || !loadedFlow) {
       return;
@@ -201,7 +246,6 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
         }
       }
 
-      // Create the machine with the collected parameters
       await createMachine(inputParams);
       setChatState('in-progress');
     };
@@ -216,7 +260,6 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     setFlowError,
   ]);
 
-  // Start the Machine once it's created
   useEffect(() => {
     const machine = getMachine();
 
@@ -235,22 +278,17 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     };
 
     startMachine();
-    // machineId is needed to trigger re-run when machine is created
   }, [getMachine, chatState, setChatState, setFlowError]);
 
   const startFlow = useCallback(
     (flow: StoredFlow) => {
-      // Reset previous state
       reset();
-
-      // Load the new flow
       setLoadedFlow(flow);
       setChatState('waiting-for-parameters');
     },
     [reset, setLoadedFlow, setChatState],
   );
 
-  // Auto-load flow if flowId is provided via deep link
   useEffect(() => {
     if (autoLoadFlowId && chatState === 'not-started') {
       const flow = storedFlows.find((f) => f.id === autoLoadFlowId);

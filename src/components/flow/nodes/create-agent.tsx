@@ -34,7 +34,11 @@ export const CreateAgentNode = ({
       const {
         target: { value },
       } = e;
-      const agent = agents.find((x) => x.id === value)!;
+      const agent = agents.find((x) => x.id === value);
+
+      if (!agent) {
+        return;
+      }
 
       updateCreateAgentNode(id, {
         agent,

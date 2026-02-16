@@ -110,7 +110,6 @@ export const CWMainScreen = ({
   onFlowSelect,
   onReset,
 }: CWMainScreenProps) => {
-  // Find the selected agent if an agent tab is selected
   const selectedAgent = activeAgents.find(
     (agent) => agent.agentFlowId === selectedTab,
   );
