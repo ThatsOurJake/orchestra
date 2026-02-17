@@ -1,6 +1,7 @@
 import {
   mdiChatOutline,
   mdiFaceAgent,
+  mdiFile,
   mdiMenuClose,
   mdiMenuOpen,
   mdiSitemapOutline,
@@ -61,6 +62,15 @@ export const NavBar = () => {
             <Icon path={mdiChatOutline} size={1} color="#ffffff" />
           </Link>
         </div>
+        <div className="flex mt-2">
+          <Link
+            to="/docs"
+            className="flex gap-x-1 justify-between items-center cursor-pointer hover:bg-gray-600 rounded-sm w-full p-2"
+          >
+            <p className="whitespace-nowrap">Docs</p>
+            <Icon path={mdiFile} size={1} color="#ffffff" />
+          </Link>
+        </div>
       </div>
       <div className={`flex flex-col ${isOpen ? 'hidden' : 'block'}`}>
         <button
@@ -89,6 +99,9 @@ export const NavBar = () => {
         </Link>
         <Link className="cursor-pointer p-2 mt-2" to="/chat" title="Chat">
           <Icon path={mdiChatOutline} size={1} color="#ffffff" />
+        </Link>
+        <Link className="cursor-pointer p-2 mt-2" to="/docs" title="Docs">
+          <Icon path={mdiFile} size={1} color="#ffffff" />
         </Link>
       </div>
     </nav>

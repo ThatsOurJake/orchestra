@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Link } from 'react-router';
 import { langRunner, syntaxCheck } from '../../lang/runner';
 import { replaceContextInStr } from '../../machine/utils';
 
@@ -93,7 +94,9 @@ export const LangPlayground = () => {
   return (
     <div className="flex flex-col gap-y-4 p-4 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold">Lang Playground</h2>
-
+      <Link to="/docs/lang">
+        <p className="text-blue-500 hover:underline">Read about lang here</p>
+      </Link>
       <div className="flex flex-col gap-y-2">
         <label htmlFor="input-text" className="font-semibold">
           Input

@@ -5,6 +5,7 @@ import { InputModal } from './components/input-modal';
 import { NavBar } from './components/nav-bar';
 import { Agents } from './routes/agents';
 import { Create } from './routes/chat';
+import { Docs } from './routes/docs';
 import { Flows } from './routes/flows';
 import { Overview } from './routes/overview';
 
@@ -45,6 +46,14 @@ const router = createBrowserRouter([
       {
         path: 'flows',
         Component: Flows,
+      },
+      {
+        path: 'docs',
+        Component: Docs,
+      },
+      {
+        path: 'docs/:slug',
+        Component: Docs,
       },
     ],
   },
