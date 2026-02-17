@@ -1,5 +1,9 @@
 # Orchestra
 
+<p align="center">
+  <img src="https://github.com/ThatsOurJake/orchestra/raw/refs/heads/main/.git-assets/demo.apng" />
+</p>
+
 A visual workflow automation tool that enables the creation and execution of AI-powered agent flows through an intuitive node-based interface.
 
 ## Overview
