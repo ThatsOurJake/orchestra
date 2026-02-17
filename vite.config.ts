@@ -19,6 +19,24 @@ export default defineConfig({
       manifest: {
         name: 'Orchestra',
         short_name: "Orchestra",
+        background_color: "#111828",
+        theme_color: '#1E2938',
+        screenshots: [
+          {
+            form_factor: 'wide',
+            src: '/wide-screen.png',
+            sizes: '1920x978'
+          }
+        ],
+        icons: [
+          {
+            src: '/icon.png',
+            sizes: '1024x1024'
+          }
+        ]
+      },
+      devOptions: {
+        enabled: true,
       }
     })],
   assetsInclude: ['**/*.txt'],

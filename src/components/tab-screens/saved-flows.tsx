@@ -88,7 +88,9 @@ export const SavedFlows = () => {
         return;
       }
 
-      const parsedFlowData = JSON.parse(flow.flowData) as { nodes: AppNodes[] };
+      const copy = { ...flow };
+
+      const parsedFlowData = JSON.parse(copy.flowData) as { nodes: AppNodes[] };
       const agentNodes = parsedFlowData.nodes.filter((x) =>
         isCreateAgentNode(x),
       );
@@ -107,14 +109,14 @@ export const SavedFlows = () => {
         node.data.selectedAgent!.agent.name = foundAgent.name;
       }
 
-      flow.flowData = JSON.stringify(parsedFlowData);
+      copy.flowData = JSON.stringify(parsedFlowData);
 
-      const dataStr = JSON.stringify(flow, null, 2);
+      const dataStr = JSON.stringify(copy, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${flow.name}.json`;
+      link.download = `${copy.name}.json`;
       link.click();
       URL.revokeObjectURL(url);
     },
