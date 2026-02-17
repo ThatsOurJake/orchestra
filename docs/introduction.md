@@ -17,4 +17,4 @@ Orchestra right now supports only Chrome's inbuilt AI agent. You'll need to conf
 
 ## Repository
 
-The Orchestra repository can be found at: [https://github.com/ThatsOurJake/orchestra](https://github.com/ThatsOurJake/orchestra)
+The Orchestra repository can be found at: [https://github.com/ThatsOurJake/orchestra](https://github.com/ThatsOurJake/orchestra). The repo contains an `examples` folder which contains flows that can be imported and tried out.
