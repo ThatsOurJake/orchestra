@@ -21,10 +21,11 @@ const mainStoreSelector = (state: MainStore) => ({
   deleteFlow: state.deleteFlow,
   addFlow: state.addFlow,
   agents: state.agents,
+  addAgentWithId: state.addAgentWithId,
 });
 
 export const SavedFlows = () => {
-  const { storedFlows, deleteFlow, addFlow, agents } = useStore(
+  const { storedFlows, deleteFlow, addFlow, agents, addAgentWithId } = useStore(
     useShallow(mainStoreSelector),
   );
   const { projectSettings, nodes, importFlowData } = useFlowStore(
@@ -146,11 +147,35 @@ export const SavedFlows = () => {
       result.lastEditedAt = undefined;
     }
 
+    const flowData = JSON.parse(result.flowData) as { nodes: AppNodes[] };
+    const foundAgents = flowData.nodes.filter((x) => isCreateAgentNode(x));
+    const nonImportedAgents = foundAgents.filter((a) => {
+      const {
+        data: { selectedAgent },
+      } = a;
+      const {
+        agent: { id: selectedAgentId },
+      } = selectedAgent!;
+      return !agents.find((x) => x.id === selectedAgentId);
+    });
+
+    for (const toImportAgent of nonImportedAgents) {
+      const {
+        data: { selectedAgent },
+      } = toImportAgent;
+      const { agent } = selectedAgent!;
+      addAgentWithId({
+        id: agent.id,
+        name: agent.name,
+        prompt: agent.prompt,
+      });
+    }
+
     addFlow(result);
     toast(`"${result.name}" imported successfully`, {
       type: 'success',
     });
-  }, [openModal, storedFlows, addFlow]);
+  }, [openModal, storedFlows, addFlow, agents, addAgentWithId]);
 
   return (
     <div className="max-w-full overflow-x-hidden">

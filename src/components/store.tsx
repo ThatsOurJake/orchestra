@@ -44,6 +44,7 @@ export interface MainStore {
   chatHistory: ChatHistory[];
   removeAgent: (agentId: string) => void;
   addAgent: (agent: Omit<Agent, 'id'>) => void;
+  addAgentWithId: (agent: Agent) => void;
   updateAgent: (agent: Agent) => void;
   addFlow: (flow: StoredFlow) => void;
   updateFlow: (flowId: string, flowData: string) => void;
@@ -83,6 +84,11 @@ const addAgent = (set: ImmerSet) => (agent: Omit<Agent, 'id'>) =>
     };
 
     state.agents.push(wholeAgent);
+  });
+
+const addAgentWithId = (set: ImmerSet) => (agent: Agent) =>
+  set((state) => {
+    state.agents.push(agent);
   });
 
 const updateAgent = (set: ImmerSet) => (agent: Agent) =>
@@ -144,6 +150,7 @@ export const useStore = create<MainStore>()(
         chatHistory: [],
         removeAgent: removeAgent(set),
         addAgent: addAgent(set),
+        addAgentWithId: addAgentWithId(set),
         updateAgent: updateAgent(set),
         addFlow: addFlow(set),
         updateFlow: updateFlow(set),

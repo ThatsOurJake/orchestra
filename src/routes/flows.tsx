@@ -1,4 +1,5 @@
 import { CreateFlow } from '../components/tab-screens/create-flow';
+import { LangPlayground } from '../components/tab-screens/lang-playground';
 import { SavedFlows } from '../components/tab-screens/saved-flows';
 import { Tab } from '../components/tabs/tab';
 import { TabBar } from '../components/tabs/tab-bar';
@@ -12,10 +13,12 @@ export const Flows = () => {
       <TabBar>
         <Tab title="Saved Flows" />
         <Tab title="Create Flow" />
+        <Tab title="Lang Playground" />
       </TabBar>
       <TabContent>
         <TabScreen component={SavedFlows} />
         <TabScreen component={CreateFlow} />
+        <TabScreen component={LangPlayground} />
       </TabContent>
     </TabsWrapper>
   );

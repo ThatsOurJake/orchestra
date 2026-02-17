@@ -32,6 +32,12 @@ export const AgentOverview = ({ agent }: AgentOverviewProps) => {
   };
 
   const onDelete = useCallback(() => {
+    const confirmation = confirm('Are you sure you want to delete this agent?');
+
+    if (!confirmation) {
+      return;
+    }
+
     removeAgent(id);
 
     toast(`Agent "${name}" has been removed`, {
