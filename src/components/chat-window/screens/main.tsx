@@ -50,11 +50,11 @@ const MainOutputDisplay = ({
         </div>
       )}
 
-      <OutputDisplay outputs={outputs} />
-
       {chatState === 'ended' && !error && (
         <p className="text-center py-2 text-sm font-bold">Flow has finished</p>
       )}
+
+      <OutputDisplay outputs={outputs} />
     </div>
   );
 };
