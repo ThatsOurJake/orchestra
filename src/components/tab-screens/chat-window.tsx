@@ -7,6 +7,7 @@ import type {
   AgentStateEvent,
   AgentWorkingStateEvent,
   AskForInputEvent,
+  ConfirmOutputEvent,
   CreateAgentEvent,
   EndEvent,
   OutputEvent,
@@ -15,6 +16,7 @@ import { AgentSidebar } from '../chat-window/agent-sidebar';
 import { useChatWindowStore } from '../chat-window/chat-window-store';
 import { CWMainScreen } from '../chat-window/screens/main';
 import { useInputModalStore } from '../input-modal/input-modal-store';
+import { useReviewModalStore } from '../review-modal/review-modal-store';
 import { type MainStore, type StoredFlow, useStore } from '../store';
 
 const selector = (state: MainStore) => ({
@@ -50,6 +52,7 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     reset,
   } = useChatWindowStore();
   const { openModal } = useInputModalStore();
+  const { openModal: openReviewModal } = useReviewModalStore();
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -98,7 +101,7 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     };
 
     const onOutput = (event: OutputEvent) => {
-      addMainOutput(event.data.content);
+      addMainOutput(event.data.content, event.data.level);
     };
 
     const onEnd = (event: EndEvent) => {
@@ -161,6 +164,22 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
       await machine.provideInput(nodeId, userInput);
     };
 
+    const onConfirmOutput = async (event: ConfirmOutputEvent) => {
+      const { nodeId, label, content } = event.data;
+
+      const result = await openReviewModal({ label, content });
+
+      if (result === null) {
+        machine.triggerEnd({
+          message: 'User dismissed the review dialog. Flow cannot continue.',
+          nodeId,
+        });
+        return;
+      }
+
+      await machine.provideConfirmation(nodeId, result);
+    };
+
     machine.addEventListener('createAgent', onCreateAgent);
     machine.addEventListener('output', onOutput);
     machine.addEventListener('end', onEnd);
@@ -168,6 +187,7 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     machine.addEventListener('agentWorkingState', onAgentWorkingState);
     machine.addEventListener('agentState', onAgentState);
     machine.addEventListener('askForInput', onAskForInput);
+    machine.addEventListener('confirmOutput', onConfirmOutput);
 
     return () => {
       console.log(
@@ -181,6 +201,7 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
       machine.removeEventListener('agentWorkingState', onAgentWorkingState);
       machine.removeEventListener('agentState', onAgentState);
       machine.removeEventListener('askForInput', onAskForInput);
+      machine.removeEventListener('confirmOutput', onConfirmOutput);
     };
   }, [
     machineId,
@@ -196,6 +217,7 @@ export const CreationWindow = ({ autoLoadFlowId }: CreationWindowProps) => {
     mainOutputs,
     addChatHistory,
     openModal,
+    openReviewModal,
   ]);
 
   useEffect(() => {

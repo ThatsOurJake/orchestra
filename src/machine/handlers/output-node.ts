@@ -7,7 +7,9 @@ export const outputNodeHandler: MachineHandler<OutputNodeProps> = (
   node: OutputNodeProps,
   machine: Machine,
 ) => {
-  const { messageContent } = node.data as Required<OutputNodeProps['data']>;
+  const { messageContent, messageLevel } = node.data as Required<
+    OutputNodeProps['data']
+  >;
   const interpolatedString = replaceContextInStr(
     messageContent,
     machine.context,
@@ -15,5 +17,6 @@ export const outputNodeHandler: MachineHandler<OutputNodeProps> = (
 
   machine.triggerEvent('output', {
     content: interpolatedString,
+    level: messageLevel ?? 'info',
   });
 };

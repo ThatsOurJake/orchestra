@@ -2,6 +2,7 @@ import { type Edge, getIncomers } from '@xyflow/react';
 import type { AppNodes } from '../components/flow/flow-store';
 import type { AskForInputNodeProps } from '../components/flow/nodes/ask-for-input';
 import type { ConditionalNodeProps } from '../components/flow/nodes/conditional';
+import type { ConfirmOutputNodeProps } from '../components/flow/nodes/confirm-output';
 import type { CreateAgentNodeProps } from '../components/flow/nodes/create-agent';
 import type { ExtractStringNodeProps } from '../components/flow/nodes/extract-string';
 import type { OutputNodeProps } from '../components/flow/nodes/output';
@@ -19,9 +20,19 @@ const nodeIdHelperBuilder = () => {
     currentId = 0;
   };
 
+  const syncIds = (nodes: AppNodes[]) => {
+    const max = nodes.reduce((highest, node) => {
+      const parts = node.id.split('_');
+      const num = Number.parseInt(parts[parts.length - 1], 10);
+      return Number.isNaN(num) ? highest : Math.max(highest, num);
+    }, -1);
+    currentId = max + 1;
+  };
+
   return {
     getNodeId,
     resetId,
+    syncIds,
   };
 };
 
@@ -58,6 +69,10 @@ export const isEndNode = (node: AppNodes): node is OutputNodeProps =>
 export const isAskForInputNode = (
   node: AppNodes,
 ): node is AskForInputNodeProps => node.type === 'askForInput';
+
+export const isConfirmOutputNode = (
+  node: AppNodes,
+): node is ConfirmOutputNodeProps => node.type === 'confirmOutput';
 
 export const walkBackFindingNodeType = (
   nodeType: AppNodes['type'][],

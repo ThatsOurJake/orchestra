@@ -11,6 +11,7 @@ export const sendAgentMessageNodeHandler: MachineHandler<
   const { selectedAgent, messageContent } = node.data as Required<
     SendMessageToAgentProps['data']
   >;
+
   const foundAgent = machine.context.get(selectedAgent.agentFlowId) as
     | AIAgent
     | undefined;
@@ -18,7 +19,7 @@ export const sendAgentMessageNodeHandler: MachineHandler<
   if (!foundAgent) {
     machine.triggerEnd({
       nodeId: node.id,
-      message: `Could not find agent "${selectedAgent}"`,
+      message: `Could not find agent "${selectedAgent.agent.name} | ${selectedAgent.agentFlowId}"`,
     });
 
     return;

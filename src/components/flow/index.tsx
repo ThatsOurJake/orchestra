@@ -8,6 +8,7 @@ import { useCurrentTab } from '../tabs/context';
 import { type AppNodes, type AppState, useFlowStore } from './flow-store';
 import { AskForInputNode } from './nodes/ask-for-input';
 import { ConditionalNode } from './nodes/conditional';
+import { ConfirmOutputNode } from './nodes/confirm-output';
 import { CreateAgentNode } from './nodes/create-agent';
 import { EndNode } from './nodes/end';
 import { ExtractStringNode } from './nodes/extract-string';
@@ -29,6 +30,7 @@ const nodeTypes = {
   variable: VariableNode,
   outputNode: OutputNode,
   askForInput: AskForInputNode,
+  confirmOutput: ConfirmOutputNode,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {

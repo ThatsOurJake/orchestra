@@ -23,6 +23,7 @@ export interface AgentOutput {
 export interface MainOutput {
   content: string;
   timestamp: number;
+  level?: 'info' | 'warning' | 'error';
 }
 
 export type ChatStates =
@@ -53,7 +54,10 @@ export type ChatWindowStore = {
   setChatState: (state: ChatStates) => void;
   setLoadedFlow: (flow: StoredFlow) => void;
   createMachine: (inputParameters: Record<string, unknown>) => Promise<void>;
-  addMainOutput: (content: string) => void;
+  addMainOutput: (
+    content: string,
+    level?: 'info' | 'warning' | 'error',
+  ) => void;
   setFlowError: (error: string | null) => void;
   reset: () => void;
 };
@@ -167,11 +171,15 @@ const createMachine = async (inputParameters: Record<string, unknown>) => {
   });
 };
 
-const addMainOutput = (content: string) => {
+const addMainOutput = (
+  content: string,
+  level?: 'info' | 'warning' | 'error',
+) => {
   useChatWindowStore.setState((state) => {
     state.mainOutputs.push({
       content,
       timestamp: Date.now(),
+      level,
     });
   });
 };

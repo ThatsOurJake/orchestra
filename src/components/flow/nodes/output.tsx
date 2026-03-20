@@ -12,9 +12,12 @@ import { BaseHandle } from '../../shadcn/base-handle';
 import { type AppState, useFlowStore } from '../flow-store';
 import { useTextInsert } from '../hooks/use-text-insert';
 
+export type OutputMessageLevel = 'info' | 'warning' | 'error';
+
 export type OutputNodeProps = Node<
   {
     messageContent?: string;
+    messageLevel?: OutputMessageLevel;
   },
   'outputNode'
 >;
@@ -27,7 +30,7 @@ const selector = (state: AppState) => ({
 });
 
 export const OutputNode = ({
-  data: { messageContent = '' },
+  data: { messageContent = '', messageLevel = 'info' },
   id,
 }: NodeProps<OutputNodeProps>) => {
   const { nodes, edges, setInteractive, updateOutputNode } = useFlowStore(
@@ -50,7 +53,7 @@ export const OutputNode = ({
 
   const handleValueChange = useCallback(
     (newValue: string) => {
-      updateOutputNode(id, newValue);
+      updateOutputNode(id, { messageContent: newValue });
     },
     [id, updateOutputNode],
   );
@@ -67,7 +70,7 @@ export const OutputNode = ({
         target: { value, selectionStart, selectionEnd, scrollTop },
       } = e;
 
-      updateOutputNode(id, value);
+      updateOutputNode(id, { messageContent: value });
 
       requestAnimationFrame(() => {
         if (textareaRef.current) {
@@ -86,6 +89,15 @@ export const OutputNode = ({
     [insertTextAtCursor],
   );
 
+  const onLevelChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      updateOutputNode(id, {
+        messageLevel: e.target.value as OutputMessageLevel,
+      });
+    },
+    [id, updateOutputNode],
+  );
+
   return (
     <BaseNode className="w-96">
       <BaseNodeHeader>
@@ -93,6 +105,21 @@ export const OutputNode = ({
       </BaseNodeHeader>
       <BaseNodeContent>
         <BaseHandle id="output-target" type="target" position={Position.Top} />
+        <div className="flex items-center gap-2 mb-2">
+          <label className="text-sm font-medium" htmlFor={`level-${id}`}>
+            Level
+          </label>
+          <select
+            id={`level-${id}`}
+            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white nodrag"
+            value={messageLevel}
+            onChange={onLevelChange}
+          >
+            <option value="info">Info</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+          </select>
+        </div>
         <textarea
           ref={textareaRef}
           className="border border-amber-600 w-full h-40 resize-none bg-white p-1 rounded nowheel nodrag"
