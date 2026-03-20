@@ -8,6 +8,9 @@ import { plugin as mdPlugin, Mode } from 'vite-plugin-markdown';
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __COMMIT_SHA__: JSON.stringify(process.env.CF_PAGES_COMMIT_SHA ?? 'unknown'),
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -15,7 +18,10 @@ export default defineConfig({
       mode: [Mode.HTML],
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      workbox: {
+        cleanupOutdatedCaches: true,
+      },
       manifest: {
         name: 'Orchestra',
         short_name: "Orchestra",
@@ -35,6 +41,9 @@ export default defineConfig({
           }
         ]
       },
+      devOptions: {
+        enabled: true,
+      }
     })],
   assetsInclude: ['**/*.txt'],
   resolve: {
