@@ -208,6 +208,9 @@ export const Sidebar = () => {
         <ToolkitNode nodeType="askForInput" onClick={handleClick}>
           <p>Ask for User Input</p>
         </ToolkitNode>
+        <ToolkitNode nodeType="confirmOutput" onClick={handleClick}>
+          <p>Review Content</p>
+        </ToolkitNode>
         <ToolkitNode nodeType="outputNode" onClick={handleClick}>
           <p>Output to main</p>
         </ToolkitNode>

@@ -8,6 +8,7 @@ import type { Agent } from '../components/store';
 import {
   isAskForInputNode,
   isConditionalNode,
+  isConfirmOutputNode,
   isCreateAgentNode,
   isEndNode,
   isExtractStringNode,
@@ -17,6 +18,7 @@ import {
 } from '../utils/flow-helpers';
 import { askForInputNodeHandler } from './handlers/ask-for-input-node';
 import { conditionalNodeHandler } from './handlers/conditional-node';
+import { confirmOutputNodeHandler } from './handlers/confirm-output-node';
 import { createAgentNodeHandler } from './handlers/create-agent-node';
 import { extractStringNodeHandler } from './handlers/extract-string-node';
 import { outputNodeHandler } from './handlers/output-node';
@@ -37,6 +39,7 @@ export interface CreateAgentEvent extends BaseEvent<'createAgent'> {
 export interface OutputEvent extends BaseEvent<'output'> {
   data: {
     content: string;
+    level?: 'info' | 'warning' | 'error';
   };
 }
 
@@ -77,6 +80,14 @@ export interface AskForInputEvent extends BaseEvent<'askForInput'> {
   };
 }
 
+export interface ConfirmOutputEvent extends BaseEvent<'confirmOutput'> {
+  data: {
+    nodeId: string;
+    label: string;
+    content: string;
+  };
+}
+
 type EventTypes =
   | CreateAgentEvent
   | OutputEvent
@@ -84,7 +95,8 @@ type EventTypes =
   | AgentResponseEvent
   | AgentWorkingStateEvent
   | AgentStateEvent
-  | AskForInputEvent;
+  | AskForInputEvent
+  | ConfirmOutputEvent;
 type EventNames = EventTypes['type'];
 type Handler = (event: EventTypes) => void;
 
@@ -118,6 +130,7 @@ export class Machine {
     agentWorkingState: [],
     agentState: [],
     askForInput: [],
+    confirmOutput: [],
   };
 
   constructor(
@@ -252,6 +265,62 @@ export class Machine {
     await this.processUntilInputOrEnd();
   }
 
+  public async provideConfirmation(nodeId: string, approved: boolean) {
+    if (this.hasEnded) {
+      console.warn('Cannot provide confirmation - flow has ended');
+      return;
+    }
+
+    if (this.state !== 'awaiting-input') {
+      console.warn('Machine is not awaiting input');
+      return;
+    }
+
+    const node = this.nodes.find((n) => n.id === nodeId);
+
+    if (!node) {
+      console.error(`Node ${nodeId} not found`);
+      return;
+    }
+
+    if (!isConfirmOutputNode(node)) {
+      console.error(`Node ${nodeId} is not a confirmOutput node`);
+      return;
+    }
+
+    const { getConnectedEdges } = await import('@xyflow/react');
+    const connectedEdges = getConnectedEdges([node], this.edges).filter(
+      (e) => e.source === node.id,
+    );
+
+    const handleId = approved
+      ? 'confirm-output-approved'
+      : 'confirm-output-rejected';
+    const targetEdge = connectedEdges.find((e) => e.sourceHandle === handleId);
+
+    if (!targetEdge) {
+      this.triggerEnd({
+        message: `Review Content node: no connection found for "${approved ? 'approved' : 'rejected'}" path`,
+        nodeId: node.id,
+      });
+      return;
+    }
+
+    const targetNode = this.nodes.find((n) => n.id === targetEdge.target);
+
+    if (!targetNode) {
+      this.triggerEnd({
+        message: `Review Content node: target node not found`,
+        nodeId: node.id,
+      });
+      return;
+    }
+
+    this.setNextNode(targetNode);
+    this.state = 'running';
+    await this.processUntilInputOrEnd();
+  }
+
   private async handleNode(node: AppNodes) {
     if (isCreateAgentNode(node)) {
       await createAgentNodeHandler(node, this);
@@ -285,6 +354,11 @@ export class Machine {
 
     if (isAskForInputNode(node)) {
       askForInputNodeHandler(node, this);
+      return;
+    }
+
+    if (isConfirmOutputNode(node)) {
+      confirmOutputNodeHandler(node, this);
       return;
     }
 

@@ -100,6 +100,25 @@ This node will ask the user via an input modal, the question that is provided wi
 - **Out connections:** One
 - **Context output:** The response to the question
 
+### Review Content
+
+This node presents previously generated content to the user in a review dialog, asking them to approve or reject it. This is useful for human-in-the-loop validation steps, such as reviewing an AI-generated ticket before it is submitted.
+
+The node has two configurable fields:
+
+- **Label (optional):** A short prompt shown above the content in the dialog (e.g. *"Is this ticket acceptable?"*). Supports `%context_key%` interpolation.
+- **Content to review:** A dropdown for selecting which context value to display in the review dialog.
+
+When the user interacts with the dialog:
+
+- **Approve** — the flow continues down the **Approved** output handle.
+- **Reject** — the flow continues down the **Rejected** output handle. A common pattern is to connect the rejected path to an **Ask for User Input** node to capture feedback, and then feed that back to an agent for revisions.
+
+The review dialog scrolls to handle long content (e.g. lengthy AI responses) and always keeps the action buttons visible.
+
+- **In connections:** Multiple
+- **Out connections:** Two (Approved, Rejected)
+
 ### Output to Main
 
 This node's sole responsibility is to write to the main output of the chat window. Whatever value is passed into the string will be displayed in the "Main Window" of the chat. This can be used for anything but is usually used for the final output of a flow.

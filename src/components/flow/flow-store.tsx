@@ -16,10 +16,12 @@ import {
   isParametersNode,
   isSendAgentMessageNode,
   isVariableNode,
+  nodeIdHelper,
 } from '../../utils/flow-helpers';
 import type { Agent, StoredFlow } from '../store';
 import type { AskForInputNodeProps } from './nodes/ask-for-input';
 import type { ConditionalNodeProps } from './nodes/conditional';
+import type { ConfirmOutputNodeProps } from './nodes/confirm-output';
 import type { CreateAgentNodeProps } from './nodes/create-agent';
 import type { EndNodeProps } from './nodes/end';
 import type { ExtractStringNodeProps } from './nodes/extract-string';
@@ -37,7 +39,8 @@ export type AppNodes =
   | EndNodeProps
   | VariableNodeProps
   | OutputNodeProps
-  | AskForInputNodeProps;
+  | AskForInputNodeProps
+  | ConfirmOutputNodeProps;
 
 export type AppState = {
   nodes: AppNodes[];
@@ -70,8 +73,18 @@ export type AppState = {
     nodeId: string,
     data: { name: string; value: string },
   ) => void;
-  updateOutputNode: (nodeId: string, messageContent: string) => void;
+  updateOutputNode: (
+    nodeId: string,
+    data: {
+      messageContent?: string;
+      messageLevel?: import('./nodes/output').OutputMessageLevel;
+    },
+  ) => void;
   updateAskForInputNode: (nodeId: string, data: { question: string }) => void;
+  updateConfirmOutputNode: (
+    nodeId: string,
+    data: { label?: string; contentKey?: string },
+  ) => void;
   projectSettings: {
     savedSinceEdits: boolean;
     loadedId?: string;
@@ -278,6 +291,23 @@ export const useFlowStore = create<AppState>((set, get) => ({
       }),
     });
   },
+  updateConfirmOutputNode: (
+    nodeId: string,
+    data: { label?: string; contentKey?: string },
+  ) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId && node.type === 'confirmOutput') {
+          return {
+            ...node,
+            data: { ...node.data, ...data },
+          };
+        }
+
+        return node;
+      }),
+    });
+  },
   exportFlowData: () => {
     const state = get();
 
@@ -303,6 +333,7 @@ export const useFlowStore = create<AppState>((set, get) => ({
       const importData = JSON.parse(flowData);
 
       if (importData.nodes && importData.edges) {
+        nodeIdHelper.syncIds(importData.nodes);
         set({
           nodes: importData.nodes,
           edges: importData.edges,

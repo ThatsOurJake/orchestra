@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { FileImportModal } from './components/file-import-modal';
 import { InputModal } from './components/input-modal';
 import { NavBar } from './components/nav-bar';
+import { ReviewModal } from './components/review-modal';
 import { Agents } from './routes/agents';
 import { Create } from './routes/chat';
 import { Docs } from './routes/docs';
@@ -22,6 +23,7 @@ const Layout = () => (
       pauseOnHover={false}
     />
     <InputModal />
+    <ReviewModal />
     <FileImportModal />
   </div>
 );
