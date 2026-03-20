@@ -106,6 +106,18 @@ This node's sole responsibility is to write to the main output of the chat windo
 
 [Lang](/docs/lang) can be used within this textarea.
 
+#### Message Level
+
+Each output node has a **Level** selector that controls the background colour of the message in the main window:
+
+| Level | Colour |
+|-------|--------|
+| **Info** (default) | Blue |
+| **Warning** | Yellow |
+| **Error** | Red |
+
+Existing flows that were saved before this feature was introduced will automatically use the **Info** level. Messages that are not produced by this node (e.g. user input confirmations) will have a plain white background.
+
 - **In connections:** Multiple
 - **Out connections:** One
 
