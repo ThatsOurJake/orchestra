@@ -5,14 +5,14 @@ interface ToolkitNodeProps {
   label: string;
   nodeType: AppNodes['type'];
   onClick: (nodeType: AppNodes['type']) => void;
-  colorClass: string;
+  colourClass: string;
 }
 
 export const ToolkitNode = ({
   nodeType,
   onClick,
   label,
-  colorClass,
+  colourClass,
 }: ToolkitNodeProps) => {
   const _onClick = useCallback(() => {
     onClick(nodeType);
@@ -20,7 +20,7 @@ export const ToolkitNode = ({
 
   return (
     <button
-      className={`border border-black/20 rounded text-center text-sm p-2 w-full cursor-pointer hover:brightness-95 transition-all ${colorClass}`}
+      className={`border border-black/20 rounded text-center text-sm p-2 w-full cursor-pointer hover:brightness-95 transition-all ${colourClass}`}
       onClick={_onClick}
       type="button"
     >

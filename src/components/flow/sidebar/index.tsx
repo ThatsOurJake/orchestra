@@ -180,7 +180,7 @@ export const Sidebar = () => {
             >
               <Accordion.Header>
                 <Accordion.Trigger
-                  className={`flex w-full items-center justify-between px-3 py-2 text-sm font-semibold cursor-pointer ${group.headerColor} [&[data-state=open]>svg]:rotate-180`}
+                  className={`flex w-full items-center justify-between px-3 py-2 text-sm font-semibold cursor-pointer ${group.headerColour} [&[data-state=open]>svg]:rotate-180`}
                 >
                   {group.label}
                   <Icon
@@ -198,7 +198,7 @@ export const Sidebar = () => {
                       nodeType={node.nodeType}
                       label={node.label}
                       onClick={handleClick}
-                      colorClass={node.colorClass}
+                      colourClass={group.nodeColourClass}
                     />
                   ))}
                 </div>
