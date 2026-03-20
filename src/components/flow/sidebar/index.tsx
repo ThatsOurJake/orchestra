@@ -1,35 +1,15 @@
-import { mdiCancel, mdiFloppy } from '@mdi/js';
+import { mdiCancel, mdiChevronDown, mdiFloppy } from '@mdi/js';
 import Icon from '@mdi/react';
 import { type Node, useReactFlow } from '@xyflow/react';
-import type React from 'react';
+import { Accordion } from 'radix-ui';
 import { useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useShallow } from 'zustand/react/shallow';
-import { nodeIdHelper } from '../../utils/flow-helpers';
-import { type MainStore, useStore } from '../store';
-import { type AppNodes, type AppState, useFlowStore } from './flow-store';
-
-interface ToolkitNodeProps {
-  children: React.ReactElement;
-  nodeType: AppNodes['type'];
-  onClick: (nodeType: AppNodes['type']) => void;
-}
-
-const ToolkitNode = ({ nodeType, onClick, children }: ToolkitNodeProps) => {
-  const _onClick = useCallback(() => {
-    onClick(nodeType);
-  }, [nodeType, onClick]);
-
-  return (
-    <button
-      className="border border-black rounded text-center p-2 bg-white cursor-pointer"
-      onClick={_onClick}
-      type="button"
-    >
-      {children}
-    </button>
-  );
-};
+import { nodeIdHelper } from '../../../utils/flow-helpers';
+import { type MainStore, useStore } from '../../store';
+import { type AppNodes, type AppState, useFlowStore } from '../flow-store';
+import { NODE_GROUPS } from './node-groups';
+import { ToolkitNode } from './toolkit-node';
 
 const selector = (state: AppState) => ({
   nodes: state.nodes,
@@ -159,7 +139,7 @@ export const Sidebar = () => {
   }, [setEdges, setNodes, resetProjectSettings]);
 
   return (
-    <aside className="px-2">
+    <aside className="px-2 flex flex-col h-full">
       <p className="text-center text-2xl">Toolbox</p>
       <p className="text-xs text-center mb-2">
         Click a node to add it to the screen!
@@ -186,38 +166,47 @@ export const Sidebar = () => {
         <p>Clear Project</p>
       </button>
       <div className="h-px my-2 bg-orange-300" />
-      <section className="my-2 flex flex-col gap-y-2">
-        <ToolkitNode nodeType="parameters" onClick={handleClick}>
-          <p>Starting Node</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="createAgent" onClick={handleClick}>
-          <p>Create Agent</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="sendMessageToAgent" onClick={handleClick}>
-          <p>Send message to agent</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="conditional" onClick={handleClick}>
-          <p>Conditional</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="extractString" onClick={handleClick}>
-          <p>Extract String</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="variable" onClick={handleClick}>
-          <p>Variable</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="askForInput" onClick={handleClick}>
-          <p>Ask for User Input</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="confirmOutput" onClick={handleClick}>
-          <p>Review Content</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="outputNode" onClick={handleClick}>
-          <p>Output to main</p>
-        </ToolkitNode>
-        <ToolkitNode nodeType="endNode" onClick={handleClick}>
-          <p>Ending Node</p>
-        </ToolkitNode>
-      </section>
+      <div className="overflow-y-auto flex-1 min-h-0">
+        <Accordion.Root
+          type="multiple"
+          defaultValue={NODE_GROUPS.map((g) => g.id)}
+          className="flex flex-col gap-y-2"
+        >
+          {NODE_GROUPS.map((group) => (
+            <Accordion.Item
+              key={group.id}
+              value={group.id}
+              className="rounded border border-black/15 overflow-hidden"
+            >
+              <Accordion.Header>
+                <Accordion.Trigger
+                  className={`flex w-full items-center justify-between px-3 py-2 text-sm font-semibold cursor-pointer ${group.headerColor} [&[data-state=open]>svg]:rotate-180`}
+                >
+                  {group.label}
+                  <Icon
+                    path={mdiChevronDown}
+                    size={0.8}
+                    className="transition-transform duration-200"
+                  />
+                </Accordion.Trigger>
+              </Accordion.Header>
+              <Accordion.Content className="overflow-hidden data-[state=closed]:animate-none">
+                <div className="flex flex-col gap-y-1 p-2">
+                  {group.nodes.map((node) => (
+                    <ToolkitNode
+                      key={node.nodeType}
+                      nodeType={node.nodeType}
+                      label={node.label}
+                      onClick={handleClick}
+                      colorClass={node.colorClass}
+                    />
+                  ))}
+                </div>
+              </Accordion.Content>
+            </Accordion.Item>
+          ))}
+        </Accordion.Root>
+      </div>
     </aside>
   );
 };
