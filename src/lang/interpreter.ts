@@ -9,6 +9,13 @@ interface OneArgListCstNode extends CstNode {
   };
 }
 
+interface ZeroOrOneArgListCstNode extends CstNode {
+  name: 'zeroOrOneArgList';
+  children: {
+    expression?: ExpressionCstNode[];
+  };
+}
+
 interface TwoArgListCstNode extends CstNode {
   name: 'twoArgList';
   children: {
@@ -44,7 +51,9 @@ interface FunctionalCallCstNode extends CstNode {
     EQ?: IToken[];
     TRIM?: IToken[];
     REPL?: IToken[];
+    TODAY?: IToken[];
     LeftBracket: IToken[];
+    zeroOrOneArgList?: ZeroOrOneArgListCstNode[];
     oneArgList?: OneArgListCstNode[];
     twoArgList?: TwoArgListCstNode[];
     threeOrFourArgList?: ThreeOrFourArgListCstNode[];
@@ -95,10 +104,14 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
       funcName = 'TRIM';
     } else if (ctx.REPL) {
       funcName = 'REPL';
+    } else if (ctx.TODAY) {
+      funcName = 'TODAY';
     }
 
     let args: unknown[];
-    if (ctx.oneArgList) {
+    if (ctx.zeroOrOneArgList) {
+      args = this.visit(ctx.zeroOrOneArgList);
+    } else if (ctx.oneArgList) {
       args = this.visit(ctx.oneArgList);
     } else if (ctx.threeOrFourArgList) {
       args = this.visit(ctx.threeOrFourArgList);
@@ -107,6 +120,13 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
     }
 
     return this.executeFunction(funcName, args);
+  }
+
+  zeroOrOneArgList(ctx: ZeroOrOneArgListCstNode['children']) {
+    if (!ctx.expression || ctx.expression.length === 0) {
+      return [];
+    }
+    return ctx.expression.map((expr) => this.visit(expr));
   }
 
   oneArgList(ctx: OneArgListCstNode['children']) {
@@ -176,6 +196,27 @@ export class SyntaxInterpreter extends BaseSyntaxVisitor {
           flags || '',
         );
         return input.replace(regex, replaceWith);
+      }
+      case 'TODAY': {
+        const now = new Date();
+        const format = args[0] as string | undefined;
+
+        if (!format) {
+          return now.toISOString().split('T')[0];
+        }
+
+        const day = now.getDate();
+        const month = now.getMonth() + 1;
+        const fullYear = now.getFullYear();
+        const shortYear = String(fullYear).slice(-2);
+
+        return format
+          .replace('dd', String(day).padStart(2, '0'))
+          .replace('mm', String(month).padStart(2, '0'))
+          .replace('yyyy', String(fullYear))
+          .replace('yy', shortYear)
+          .replace('d', String(day))
+          .replace('m', String(month));
       }
     }
   }

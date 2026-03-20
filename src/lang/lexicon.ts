@@ -41,6 +41,12 @@ export const REPL = createToken({
   longer_alt: Identifier,
 });
 
+export const TODAY = createToken({
+  name: 'TODAY',
+  pattern: /TODAY/,
+  longer_alt: Identifier,
+});
+
 export const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /\s+/,
@@ -86,6 +92,7 @@ export const allLangTokens = [
   NOT,
   TRIM,
   REPL,
+  TODAY,
   Variable,
   // Other
   Identifier,

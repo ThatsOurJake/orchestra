@@ -141,6 +141,34 @@ REPL("Hello", "lo", "no", "ig")
 
 ---
 
+### TODAY
+
+Returns today's date. An optional format string can be passed to control the output. If no format is provided, the date is returned in ISO format (`yyyy-mm-dd`).
+
+**Usage:**
+```
+TODAY()
+TODAY("dd/mm/yyyy")
+TODAY("dd-mm-yyyy")
+TODAY("yyyy/mm/dd")
+```
+
+**Arguments:**
+- Arg1: Format string [optional]. Composed of any combination of the following tokens along with any separator characters you like:
+
+| Token | Description | Example |
+|-------|-------------|---------|
+| `dd` | Day with leading zero | `05` |
+| `d` | Day without leading zero | `5` |
+| `mm` | Month with leading zero | `03` |
+| `m` | Month without leading zero | `3` |
+| `yyyy` | Full 4-digit year | `2026` |
+| `yy` | Short 2-digit year | `26` |
+
+**Returns:** A string representing today's date
+
+---
+
 ## Chaining Expressions
 
 It's possible to chain Lang expressions together:
