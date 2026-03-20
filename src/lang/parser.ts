@@ -12,6 +12,7 @@ import {
   REPL,
   RightBracket,
   StringLiteral,
+  TODAY,
   TRIM,
   Variable,
 } from './lexicon';
@@ -62,7 +63,21 @@ export class SyntaxParser extends CstParser {
           this.CONSUME3(RightBracket);
         },
       },
+      {
+        ALT: () => {
+          this.CONSUME(TODAY);
+          this.CONSUME4(LeftBracket);
+          this.SUBRULE(this.zeroOrOneArgList);
+          this.CONSUME4(RightBracket);
+        },
+      },
     ]);
+  });
+
+  zeroOrOneArgList = this.RULE('zeroOrOneArgList', () => {
+    this.OPTION(() => {
+      this.SUBRULE(this.expression);
+    });
   });
 
   oneArgList = this.RULE('oneArgList', () => {

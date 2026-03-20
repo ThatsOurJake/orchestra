@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { langRunner, syntaxCheck } from './runner';
 
 describe('Lang Runner', () => {
@@ -143,5 +143,66 @@ describe('Syntax Check', () => {
     expect(result[0].message).toContain(
       `Expecting: one of these possible Token sequences`,
     );
+  });
+});
+
+describe('TODAY', () => {
+  const FIXED_DATE = new Date(2026, 2, 20); // 20 March 2026
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(FIXED_DATE);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns todays date in ISO format (yyyy-mm-dd) when no format is provided', () => {
+    const result = langRunner('TODAY()', new Map());
+
+    expect(result).toBe('2026-03-20');
+  });
+
+  it('formats date as dd/mm/yyyy', () => {
+    const result = langRunner('TODAY("dd/mm/yyyy")', new Map());
+
+    expect(result).toBe('20/03/2026');
+  });
+
+  it('formats date as dd-mm-yyyy', () => {
+    const result = langRunner('TODAY("dd-mm-yyyy")', new Map());
+
+    expect(result).toBe('20-03-2026');
+  });
+
+  it('formats date as yyyy/mm/dd', () => {
+    const result = langRunner('TODAY("yyyy/mm/dd")', new Map());
+
+    expect(result).toBe('2026/03/20');
+  });
+
+  it('formats date as mm-dd-yyyy', () => {
+    const result = langRunner('TODAY("mm-dd-yyyy")', new Map());
+
+    expect(result).toBe('03-20-2026');
+  });
+
+  it('formats date with short year yy', () => {
+    const result = langRunner('TODAY("dd/mm/yy")', new Map());
+
+    expect(result).toBe('20/03/26');
+  });
+
+  it('formats date with no-padding day and month tokens', () => {
+    const result = langRunner('TODAY("d/m/yyyy")', new Map());
+
+    expect(result).toBe('20/3/2026');
+  });
+
+  it('can be used inside other expressions like NOT(NULL(TODAY()))', () => {
+    const result = langRunner('NOT(NULL(TODAY()))', new Map());
+
+    expect(result).toBe(true);
   });
 });
