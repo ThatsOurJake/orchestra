@@ -1,4 +1,4 @@
-import { type Edge, getOutgoers } from '@xyflow/react';
+import { type Edge, getConnectedEdges, getOutgoers } from '@xyflow/react';
 import type { AppNodes } from '../components/flow/flow-store';
 import type {
   Parameter,
@@ -288,7 +288,6 @@ export class Machine {
       return;
     }
 
-    const { getConnectedEdges } = await import('@xyflow/react');
     const connectedEdges = getConnectedEdges([node], this.edges).filter(
       (e) => e.source === node.id,
     );
