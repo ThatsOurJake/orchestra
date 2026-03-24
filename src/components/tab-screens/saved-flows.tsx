@@ -185,17 +185,19 @@ export const SavedFlows = () => {
         <p className="text-center py-2">You currently have no flows stored.</p>
       )}
       <div className="my-2 gap-2 flex flex-row flex-wrap max-w-full">
-        {storedFlows.map((x) => {
-          return (
-            <SavedFlowCard
-              flow={x}
-              onDeleteFlow={onDeleteFlow}
-              onEditFlow={onEditFlow}
-              onExportFlow={onExportFlow}
-              key={x.id}
-            />
-          );
-        })}
+        {storedFlows
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((x) => {
+            return (
+              <SavedFlowCard
+                flow={x}
+                onDeleteFlow={onDeleteFlow}
+                onEditFlow={onEditFlow}
+                onExportFlow={onExportFlow}
+                key={x.id}
+              />
+            );
+          })}
         <button
           type="button"
           onClick={onImport}
